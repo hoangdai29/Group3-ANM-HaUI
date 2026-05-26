@@ -1,0 +1,103 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D7A736E5-E255-43D4-A633-E1EF4A499E41}|Elgamal_Signature_CS.csproj|d:\\group3-anm-haui\\elgamal_signature_cs\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7A736E5-E255-43D4-A633-E1EF4A499E41}|Elgamal_Signature_CS.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7A736E5-E255-43D4-A633-E1EF4A499E41}|Elgamal_Signature_CS.csproj|d:\\group3-anm-haui\\elgamal_signature_cs\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{D7A736E5-E255-43D4-A633-E1EF4A499E41}|Elgamal_Signature_CS.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7A736E5-E255-43D4-A633-E1EF4A499E41}|Elgamal_Signature_CS.csproj|d:\\group3-anm-haui\\elgamal_signature_cs\\elgamal_signature_cs.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{D7A736E5-E255-43D4-A633-E1EF4A499E41}|Elgamal_Signature_CS.csproj|solutionrelative:elgamal_signature_cs.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7A736E5-E255-43D4-A633-E1EF4A499E41}|Elgamal_Signature_CS.csproj|d:\\group3-anm-haui\\elgamal_signature_cs\\elgamalcrypto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7A736E5-E255-43D4-A633-E1EF4A499E41}|Elgamal_Signature_CS.csproj|solutionrelative:elgamalcrypto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7A736E5-E255-43D4-A633-E1EF4A499E41}|Elgamal_Signature_CS.csproj|d:\\group3-anm-haui\\elgamal_signature_cs\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{D7A736E5-E255-43D4-A633-E1EF4A499E41}|Elgamal_Signature_CS.csproj|solutionrelative:app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Elgamalcrypto.cs",
+              "DocumentMoniker": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\Elgamalcrypto.cs",
+              "RelativeDocumentMoniker": "Elgamalcrypto.cs",
+              "ToolTip": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\Elgamalcrypto.cs",
+              "RelativeToolTip": "Elgamalcrypto.cs",
+              "ViewState": "AgIAAMcAAAAAAAAAAAAqwPMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-26T10:33:45.01Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "App.xaml",
+              "DocumentMoniker": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\App.xaml",
+              "RelativeDocumentMoniker": "App.xaml",
+              "ToolTip": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\App.xaml",
+              "RelativeToolTip": "App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-05-26T10:11:46.735Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Elgamal_Signature_CS",
+              "DocumentMoniker": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\Elgamal_Signature_CS.csproj",
+              "RelativeDocumentMoniker": "Elgamal_Signature_CS.csproj",
+              "ToolTip": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\Elgamal_Signature_CS.csproj",
+              "RelativeToolTip": "Elgamal_Signature_CS.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-05-26T10:11:44.539Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "MainWindow.xaml",
+              "ToolTip": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\MainWindow.xaml",
+              "RelativeToolTip": "MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-05-26T11:09:45.333Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
+              "ToolTip": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\MainWindow.xaml.cs",
+              "RelativeToolTip": "MainWindow.xaml.cs",
+              "ViewState": "AgIAAEQBAAAAAAAAAAAmwFsBAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-26T10:11:20.37Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
