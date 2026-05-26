@@ -1,0 +1,25 @@
+# Maven build output
+/target/
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+.metadata/
+
+# OS generated
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Demo outputs (signature and keys generated dynamically)
+*.sig
+*key.txt
+*keys.txt

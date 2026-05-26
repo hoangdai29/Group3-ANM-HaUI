@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane minHeight="650.0" minWidth="1100.0" prefHeight="720.0" prefWidth="1200.0" styleClass="root-pane" xmlns="http://javafx.scene.com/javafx/17" xmlns:fx="http://javafx.scene.com/fxml/1" fx:controller="vn.haui.elgamal.controller.MainController">
+    
+    <!-- TOP: Banner Tiêu đề -->
+    <top>
+        <VBox alignment="CENTER" prefHeight="70.0" prefWidth="1200.0" styleClass="header-banner" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="10.0" top="10.0" />
+            </padding>
+            <children>
+                <Label text="HỆ THỐNG CHỮ KÝ SỐ ELGAMAL" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="22.0" />
+                    </font>
+                </Label>
+                <Label text="Bài thực nghiệm môn An Ninh Mạng - Khoa Công nghệ thông tin - HaUI" textFill="#e0e7ff">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+            </children>
+        </VBox>
+    </top>
+
+    <!-- CENTER: Bố cục 3 Cột chính -->
+    <center>
+        <HBox spacing="15.0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="10.0" left="15.0" right="15.0" top="15.0" />
+            </padding>
+            <children>
+                
+                <!-- CỘT 1: TẠO KHÓA -->
+                <VBox prefWidth="380.0" styleClass="step-card" HBox.hgrow="ALWAYS">
+                    <children>
+                        <!-- Header Cột 1 -->
+                        <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="200.0" styleClass="card-header, keygen-header">
+                            <padding>
+                                <Insets left="15.0" />
+                            </padding>
+                            <children>
+                                <Label text="BƯỚC 1: TẠO KHÓA" textFill="#4338ca">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        
+                        <!-- Body Cột 1 -->
+                        <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                            <padding>
+                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                            </padding>
+                            <children>
+                                <!-- Sinh tự động -->
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label text="Độ dài khóa:">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font>
+                                        </Label>
+                                        <ComboBox fx:id="cbBitLength" prefWidth="100.0" styleClass="combo-box" />
+                                        <Button fx:id="btnAutoKey" mnemonicParsing="false" onAction="#handleAutoKeyGen" styleClass="btn, btn-primary" text="Sinh tự động" HBox.hgrow="ALWAYS" />
+                                    </children>
+                                </HBox>
+                                
+                                <!-- Nhập thủ công -->
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Button fx:id="btnManualMode" mnemonicParsing="false" onAction="#toggleManualMode" styleClass="btn, btn-secondary" text="Nhập thủ công" />
+                                        <ProgressIndicator fx:id="progressKeyGen" prefHeight="25.0" prefWidth="25.0" visible="false" />
+                                    </children>
+                                </HBox>
+                                
+                                <!-- Khu vực các trường nhập thủ công (Có thể ẩn/hiện) -->
+                                <VBox fx:id="vboxManualInput" spacing="5.0" visible="false" managed="false">
+                                    <children>
+                                        <Label text="Số nguyên tố p (Hệ 10):" />
+                                        <TextField fx:id="tfManualP" promptText="Ví dụ: 98436402..." />
+                                        <Label fx:id="lblErrorP" styleClass="lbl-error" text="p phải là số nguyên tố" visible="false" managed="false" />
+
+                                        <Label text="Căn nguyên thủy alpha (Hệ 10):" />
+                                        <TextField fx:id="tfManualAlpha" promptText="Ví dụ: 2, 3, 5..." />
+                                        <Label fx:id="lblErrorAlpha" styleClass="lbl-error" text="alpha không phải căn nguyên thủy" visible="false" managed="false" />
+
+                                        <Label text="Khóa bí mật x (Hệ 10):" />
+                                        <TextField fx:id="tfManualX" promptText="Ví dụ: 12345 (1 &lt; x &lt; p-1)" />
+                                        <Label fx:id="lblErrorX" styleClass="lbl-error" text="x không nằm trong khoảng hợp lệ" visible="false" managed="false" />
+                                        
+                                        <Button fx:id="btnApplyManualKey" mnemonicParsing="false" onAction="#handleApplyManualKey" styleClass="btn, btn-secondary" text="Áp dụng khóa" />
+                                    </children>
+                                </VBox>
+                                
+                                <!-- Hiển thị kết quả khóa -->
+                                <GridPane hgap="8.0" vgap="8.0" VBox.vgrow="ALWAYS">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="NEVER" maxWidth="80.0" minWidth="40.0" prefWidth="45.0" />
+                                        <ColumnConstraints hgrow="ALWAYS" />
+                                        <ColumnConstraints hgrow="NEVER" maxWidth="45.0" minWidth="45.0" prefWidth="45.0" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints vgrow="ALWAYS" />
+                                        <RowConstraints vgrow="ALWAYS" />
+                                        <RowConstraints vgrow="ALWAYS" />
+                                        <RowConstraints vgrow="ALWAYS" />
+                                    </rowConstraints>
+                                    <children>
+                                        <Label text="p:" GridPane.rowIndex="0">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font></Label>
+                                        <TextArea fx:id="taKeyP" editable="false" prefHeight="40.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                        <Button mnemonicParsing="false" onAction="#copyP" styleClass="btn-copy" text="Copy" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+
+                                        <Label text="alpha:" GridPane.rowIndex="1">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font></Label>
+                                        <TextArea fx:id="taKeyAlpha" editable="false" prefHeight="40.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <Button mnemonicParsing="false" onAction="#copyAlpha" styleClass="btn-copy" text="Copy" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+
+                                        <Label text="x (Pri):" GridPane.rowIndex="2">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font></Label>
+                                        <TextArea fx:id="taKeyX" editable="false" prefHeight="40.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <Button mnemonicParsing="false" onAction="#copyX" styleClass="btn-copy" text="Copy" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+
+                                        <Label text="y (Pub):" GridPane.rowIndex="3">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font></Label>
+                                        <TextArea fx:id="taKeyY" editable="false" prefHeight="40.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                        <Button mnemonicParsing="false" onAction="#copyY" styleClass="btn-copy" text="Copy" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                    </children>
+                                </GridPane>
+                                
+                                <HBox spacing="10.0">
+                                    <children>
+                                        <Button fx:id="btnSaveKeys" mnemonicParsing="false" onAction="#handleSaveKeys" prefWidth="180.0" styleClass="btn, btn-primary" text="Lưu khóa ra file" HBox.hgrow="ALWAYS" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+                
+                <!-- CỘT 2: KÝ TÀI LIỆU -->
+                <VBox prefWidth="380.0" styleClass="step-card" HBox.hgrow="ALWAYS">
+                    <children>
+                        <!-- Header Cột 2 -->
+                        <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="200.0" styleClass="card-header, sign-header">
+                            <padding>
+                                <Insets left="15.0" />
+                            </padding>
+                            <children>
+                                <Label text="BƯỚC 2: KÝ TÀI LIỆU" textFill="#1d4ed8">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        
+                        <!-- Body Cột 2 -->
+                        <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                            <padding>
+                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                            </padding>
+                            <children>
+                                <!-- Lựa chọn nguồn văn bản / file -->
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label text="Nguồn dữ liệu:">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font>
+                                        </Label>
+                                        <ComboBox fx:id="cbSignSourceType" onAction="#handleSignSourceTypeChange" prefWidth="160.0" styleClass="combo-box" />
+                                    </children>
+                                </HBox>
+                                
+                                <!-- Vùng nhập Text trực tiếp -->
+                                <VBox fx:id="vboxSignText" spacing="5.0" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Văn bản trực tiếp:" />
+                                        <TextArea fx:id="taSignInput" prefHeight="130.0" promptText="Nhập văn bản cần ký tại đây..." wrapText="true" VBox.vgrow="ALWAYS" />
+                                    </children>
+                                </VBox>
+                                
+                                <!-- Vùng chọn file -->
+                                <VBox fx:id="vboxSignFile" spacing="8.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Chọn tệp tin để ký (.pdf, .docx, .txt,...):" />
+                                        <HBox spacing="10.0">
+                                            <children>
+                                                <Button fx:id="btnSelectSignFile" mnemonicParsing="false" onAction="#handleSelectSignFile" styleClass="btn, btn-secondary" text="Chọn file..." />
+                                                <Label fx:id="lblSignFilePath" text="Chưa chọn file nào." wrapText="true" HBox.hgrow="ALWAYS">
+                                                    <padding>
+                                                        <Insets top="5.0" />
+                                                    </padding>
+                                                    <font>
+                                                        <Font name="System Italic" size="12.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                        </HBox>
+                                        <Label styleClass="lbl-info" text="* Lưu ý: Đối với file nhị phân (.pdf, .docx), hệ thống ký trên toàn bộ dữ liệu file, không hiển thị nội dung văn bản." wrapText="true">
+                                            <font>
+                                                <Font name="System Italic" size="11.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+                                
+                                <!-- Nút ký và Tiến trình -->
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Button fx:id="btnSign" mnemonicParsing="false" onAction="#handleSign" prefWidth="150.0" styleClass="btn, btn-info" text="Ký tài liệu" />
+                                        <ProgressIndicator fx:id="progressSign" prefHeight="25.0" prefWidth="25.0" visible="false" />
+                                    </children>
+                                </HBox>
+                                
+                                <!-- Hiển thị chữ ký Base64 đầu ra -->
+                                <VBox spacing="5.0" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Chữ ký đầu ra (r_base64|s_base64):">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font></Label>
+                                        <TextArea fx:id="taSignOutput" editable="false" prefHeight="100.0" promptText="Chữ ký số sẽ hiển thị ở đây sau khi ký..." wrapText="true" VBox.vgrow="ALWAYS" />
+                                    </children>
+                                </VBox>
+                                
+                                <HBox spacing="10.0">
+                                    <children>
+                                        <Button fx:id="btnSaveSignature" mnemonicParsing="false" onAction="#handleSaveSignature" prefWidth="180.0" styleClass="btn, btn-info" text="Lưu chữ ký (.sig)" HBox.hgrow="ALWAYS" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+                
+                <!-- CỘT 3: XÁC MINH CHỮ KÝ -->
+                <VBox prefWidth="380.0" styleClass="step-card" HBox.hgrow="ALWAYS">
+                    <children>
+                        <!-- Header Cột 3 -->
+                        <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="200.0" styleClass="card-header, verify-header">
+                            <padding>
+                                <Insets left="15.0" />
+                            </padding>
+                            <children>
+                                <Label text="BƯỚC 3: XÁC MINH CHỮ KÝ" textFill="#065f46">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        
+                        <!-- Body Cột 3 -->
+                        <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                            <padding>
+                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                            </padding>
+                            <children>
+                                <!-- Lựa chọn nguồn văn bản / file xác minh -->
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label text="Nguồn dữ liệu:">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font>
+                                        </Label>
+                                        <ComboBox fx:id="cbVerifySourceType" onAction="#handleVerifySourceTypeChange" prefWidth="160.0" styleClass="combo-box" />
+                                    </children>
+                                </HBox>
+                                
+                                <!-- Vùng nhập dữ liệu Text xác minh -->
+                                <VBox fx:id="vboxVerifyText" spacing="5.0" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Văn bản cần kiểm tra:" />
+                                        <TextArea fx:id="taVerifyInput" prefHeight="80.0" promptText="Nhập hoặc dán văn bản cần xác minh..." wrapText="true" VBox.vgrow="ALWAYS" />
+                                    </children>
+                                </VBox>
+                                
+                                <!-- Vùng chọn file xác minh -->
+                                <VBox fx:id="vboxVerifyFile" spacing="8.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Chọn tệp tin cần kiểm tra:" />
+                                        <HBox spacing="10.0">
+                                            <children>
+                                                <Button fx:id="btnSelectVerifyFile" mnemonicParsing="false" onAction="#handleSelectVerifyFile" styleClass="btn, btn-secondary" text="Chọn file..." />
+                                                <Label fx:id="lblVerifyFilePath" text="Chưa chọn file nào." wrapText="true" HBox.hgrow="ALWAYS">
+                                                    <padding>
+                                                        <Insets top="5.0" />
+                                                    </padding>
+                                                    <font>
+                                                        <Font name="System Italic" size="12.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                                
+                                <!-- Nhập chữ ký và Khóa công khai y -->
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="Chữ ký (Paste hoặc chọn file .sig):" />
+                                        <HBox spacing="8.0">
+                                            <children>
+                                                <TextArea fx:id="taVerifySignature" prefHeight="45.0" promptText="Dán r_base64|s_base64..." wrapText="true" HBox.hgrow="ALWAYS" />
+                                                <Button fx:id="btnSelectSigFile" mnemonicParsing="false" onAction="#handleSelectSigFile" prefHeight="45.0" styleClass="btn-copy" text="Tệp .sig" />
+                                            </children>
+                                        </HBox>
+                                        
+                                        <Label text="Khóa công khai y (Hệ 10):" />
+                                        <TextArea fx:id="taVerifyPubY" prefHeight="45.0" promptText="Nhập y (Hoặc tự động nhận từ Bước 1)..." wrapText="true" />
+                                    </children>
+                                </VBox>
+                                
+                                <!-- Nút kiểm tra và Tiến trình -->
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Button fx:id="btnVerify" mnemonicParsing="false" onAction="#handleVerify" prefWidth="150.0" styleClass="btn, btn-success" text="Xác minh chữ ký" />
+                                        <ProgressIndicator fx:id="progressVerify" prefHeight="25.0" prefWidth="25.0" visible="false" />
+                                    </children>
+                                </HBox>
+                                
+                                <!-- Kết quả kiểm tra -->
+                                <VBox fx:id="vboxResultCard" alignment="CENTER" prefHeight="65.0" styleClass="result-card-default" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <Label fx:id="lblVerifyResult" text="Chưa thực hiện xác minh" textAlignment="CENTER" wrapText="true">
+                                            <font>
+                                                <Font name="System Bold" size="13.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+                
+            </children>
+        </HBox>
+    </center>
+    
+    <!-- BOTTOM: Nhật ký hệ thống & Reset -->
+    <bottom>
+        <VBox spacing="5.0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="5.0" />
+            </padding>
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <Label text="LỊCH SỬ HÀNH ĐỘNG">
+                            <font>
+                                <Font name="System Bold" size="13.0" />
+                            </font>
+                        </Label>
+                        <HBox HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnClearLog" mnemonicParsing="false" onAction="#handleClearLog" styleClass="btn-copy" text="Xóa lịch sử" />
+                        <Button fx:id="btnResetAll" mnemonicParsing="false" onAction="#handleResetAll" styleClass="btn-copy" text="Reset toàn bộ hệ thống" />
+                    </children>
+                </HBox>
+                <ListView fx:id="lvLogs" prefHeight="110.0" styleClass="log-list-view" />
+            </children>
+        </VBox>
+    </bottom>
+</BorderPane>
