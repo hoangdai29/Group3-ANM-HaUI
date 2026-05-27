@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Elgamal_Signature_CS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+195c954158307c5bc7f0a65caa313cab97b4645d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9a560b9e86d68c9af5a62737e2343de30f79297a")]
 [assembly: System.Reflection.AssemblyProductAttribute("Elgamal_Signature_CS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Elgamal_Signature_CS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
