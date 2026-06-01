@@ -2,86 +2,164 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Chữ Ký Số ElGamal — Nhóm 3 ANM-HaUI"
-        Height="780" Width="980"
-        MinHeight="600" MinWidth="800"
+        Height="880" Width="1080"
+        MinHeight="720" MinWidth="880"
         WindowStartupLocation="CenterScreen"
-        Background="#ECEFF1">
-
+        Background="#0A0F1D">
     <Window.Resources>
         <Style x:Key="BtnPrimary" TargetType="Button">
-            <Setter Property="Background" Value="#1565C0"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#00F5FF"/>
+            <Setter Property="Foreground" Value="#000000"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="22,9"/>
+            <Setter Property="FontWeight" Value="Black"/>
+            <Setter Property="Padding" Value="20,10"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="5" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#00C8FF"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#1A2630"/>
+                    <Setter Property="Foreground" Value="#556677"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="BtnSecondary" TargetType="Button">
+            <Setter Property="Background" Value="#0B1520"/>
+            <Setter Property="Foreground" Value="#33CFFF"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="#005F87"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#005F87"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                    <Setter Property="BorderBrush" Value="#00F5FF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="BtnSuccess" TargetType="Button">
+            <Setter Property="Background" Value="#00FF87"/>
+            <Setter Property="Foreground" Value="#000000"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#00D570"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#0D2018"/>
+                    <Setter Property="Foreground" Value="#2A503F"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="BtnDanger" TargetType="Button">
+            <Setter Property="Background" Value="#FF4D4D"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#CC0000"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="TxtEditable" TargetType="TextBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="FontFamily" Value="Consolas"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Background" Value="#020406"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="CaretBrush" Value="#00F5FF"/>
+            <Setter Property="FontFamily" Value="Consolas, Cascadia Code, Courier New"/>
+            <Setter Property="FontSize" Value="12.5"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="BorderBrush" Value="#90A4AE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="BorderBrush" Value="#00A2FF"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="SelectionBrush" Value="#00F5FF"/>
         </Style>
 
         <Style x:Key="TxtReadonly" TargetType="TextBox">
-            <Setter Property="Background" Value="#F5F7FA"/>
-            <Setter Property="FontFamily" Value="Consolas"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Background" Value="#000A14"/>
+            <Setter Property="Foreground" Value="#00FFD1"/>
+            <Setter Property="FontFamily" Value="Consolas, Cascadia Code, Courier New"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="BorderBrush" Value="#CFD8DC"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="BorderBrush" Value="#005F87"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="8,6"/>
         </Style>
 
         <Style x:Key="LblField" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#37474F"/>
-            <Setter Property="Margin" Value="0,10,0,3"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#A0C0D5"/>
+            <Setter Property="Margin" Value="0,10,0,4"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
         </Style>
-        <Style x:Key="BtnSecondary" TargetType="Button">
-            <Setter Property="Background" Value="#546E7A"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Padding" Value="10,6"/>
+
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Black"/>
+            <Setter Property="Foreground" Value="#00F5FF"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <Style x:Key="HelpText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#CDD9E5"/>
+            <Setter Property="Margin" Value="0,4,0,12"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="20"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+
+        <Style x:Key="TabItemStyle" TargetType="TabItem">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Black"/>
+            <Setter Property="Padding" Value="24,12"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabBorder" 
+                                Background="#0A1424" 
+                                BorderBrush="#005F87" 
+                                BorderThickness="1,1,1,0" 
+                                Margin="2,0,2,0" 
+                                CornerRadius="4,4,0,0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter x:Name="ContentSite"
+                                              ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
                         </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="BtnTransfer" TargetType="Button">
-            <Setter Property="Background" Value="#2E7D32"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Padding" Value="14,7"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="#00F5FF"/>
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#FFFFFF"/>
+                                <Setter Property="Foreground" Value="#000000"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -92,124 +170,363 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#1565C0">
-            <StackPanel Margin="20,14" HorizontalAlignment="Center">
-                <TextBlock Text="🔐 CHỮ KÝ SỐ ELGAMAL" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                <TextBlock Text="Chế độ: Sinh tự động siêu tốc &amp; Nhập thủ công đề bài | Nhóm 3" FontSize="11.5" Foreground="#90CAF9" HorizontalAlignment="Center" Margin="0,4,0,0"/>
-            </StackPanel>
+        <Border Grid.Row="0" Background="#020406" BorderBrush="#005F87" BorderThickness="0,0,0,2">
+            <Grid Margin="24,16,24,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="#00F5FF" CornerRadius="6" Width="38" Height="38" Margin="0,0,14,0">
+                        <TextBlock Text="🔐" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="CHỮ KÝ SỐ ELGAMAL" FontSize="20" FontWeight="Black" Foreground="#FFFFFF" FontFamily="Segoe UI"/>
+                        <TextBlock Text="ELGAMAL DIGITAL SIGNATURE HIGH-CONTRAST CONSOLE" FontSize="11" FontWeight="Bold" Foreground="#0096B7" FontFamily="Segoe UI"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <Border Background="#001424" CornerRadius="5" Padding="12,6" Margin="0,0,8,0" BorderBrush="#00F5FF" BorderThickness="1.5">
+                        <TextBlock x:Name="txtHeaderKeyStatus" Text="⬤  CHƯA KHỞI TẠO KHÓA" Foreground="#FF4D4D" FontSize="11.5" FontWeight="Black" FontFamily="Segoe UI"/>
+                    </Border>
+                    <Border Background="#001424" CornerRadius="5" Padding="12,6" BorderBrush="#005F87" BorderThickness="1.5">
+                        <TextBlock Text="Nhóm 3 · ANM-HaUI" Foreground="#FFFFFF" FontSize="11.5" FontWeight="Bold"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
         </Border>
 
-        <TabControl Grid.Row="1" x:Name="tabMain" Margin="12,10,12,12" Background="White" BorderBrush="#CFD8DC">
+        <TabControl Grid.Row="1" x:Name="tabMain" Background="#0A0F1D" BorderThickness="0,2,0,0" BorderBrush="#005F87" Margin="0" Padding="0">
+            <TabControl.Resources>
+                <Style TargetType="TabPanel">
+                    <Setter Property="Background" Value="#020406"/>
+                </Style>
+            </TabControl.Resources>
 
-            <TabItem FontSize="13" FontWeight="SemiBold" Padding="12,6" Header="🔑 Tạo Khóa">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="22,16">
-                        <TextBlock Text="Sinh cặp khóa hoặc Nhập tham số bài tập toán" FontSize="15" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,14"/>
+            <TabItem Style="{StaticResource TabItemStyle}" Header="🔑  TẠO KHÓA">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#0A0F1D">
+                    <Grid Margin="24,24,24,24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="24"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                            <TextBlock Text="Kích thước khóa tự động:" Style="{StaticResource LblField}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                            <ComboBox x:Name="cmbKeySize" Width="170" SelectedIndex="1" VerticalAlignment="Center" Padding="6,4">
-                                <ComboBoxItem Content="256-bit (Demo nhanh)"/>
-                                <ComboBoxItem Content="512-bit (Khuyến nghị)"/>
-                                <ComboBoxItem Content="1024-bit (Tối ưu mới)"/>
-                            </ComboBox>
-                            <Button Content="⚙ Tự Động Sinh" x:Name="btnGenerateKeys" Style="{StaticResource BtnPrimary}" Click="BtnGenerateKeys_Click" Margin="14,0,0,0"/>
-                            <Button Content="📝 Áp Dụng Thủ Công" x:Name="btnApplyManual" Style="{StaticResource BtnPrimary}" Background="#E65100" Click="BtnApplyManual_Click" Margin="14,0,0,0"/>
-                            <Button Content="💾 Lưu Cặp Khóa" x:Name="btnSaveKeys" Style="{StaticResource BtnTransfer}" Click="BtnSaveKeys_Click" Margin="14,0,0,0"/>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Style="{StaticResource SectionHeader}" Text="⚙️ CẤU HÌNH SINH KHÓA TỰ ĐỘNG"/>
+                            <Border Background="#000A14" CornerRadius="8" Padding="18" Margin="0,0,0,16" BorderBrush="#005F87" BorderThickness="2">
+                                <StackPanel>
+                                    <TextBlock Text="Kích thước khóa bảo mật:" Style="{StaticResource LblField}" Foreground="#FFFFFF" Margin="0,0,0,6"/>
+                                    <ComboBox x:Name="cmbKeySize" Background="#020406" Foreground="#000000" BorderBrush="#00F5FF" BorderThickness="2" Padding="10,8" SelectedIndex="1" FontSize="13" FontWeight="Bold">
+                                        <ComboBoxItem Content="256-bit (Khởi tạo siêu nhanh Demo)"/>
+                                        <ComboBoxItem Content="512-bit (Kích thước chuẩn thuật toán)"/>
+                                        <ComboBoxItem Content="1024-bit (Độ an toàn tối ưu cao nhất)"/>
+                                    </ComboBox>
+                                    <Button Content="⚡  BẮT ĐẦU TỰ ĐỘNG SINH KHÓA" x:Name="btnGenerateKeys" Style="{StaticResource BtnPrimary}" Click="BtnGenerateKeys_Click" Margin="0,16,0,0" HorizontalAlignment="Stretch" Height="42"/>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Style="{StaticResource SectionHeader}" Text="📝 CẤU HÌNH THỦ CÔNG (DÀNH CHO ĐỀ BÀI)"/>
+                            <Border Background="#000A14" CornerRadius="8" Padding="18" Margin="0,0,0,16" BorderBrush="#005F87" BorderThickness="2">
+                                <StackPanel>
+                                    <TextBlock Text="Điền trực tiếp các giá trị số q, a, X_A vào bảng bên phải rồi kích hoạt nút dưới đây để tự tính toán Y_A." Foreground="#A0C0D5" FontSize="12" Margin="0,0,0,12" TextWrapping="Wrap"/>
+                                    <Button Content="📐  ÁP DỤNG THÔNG SỐ THỦ CÔNG" x:Name="btnApplyManual" Style="{StaticResource BtnDanger}" Click="BtnApplyManual_Click" HorizontalAlignment="Stretch" Height="38"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border x:Name="borderKeyStatus" Background="#110505" CornerRadius="6" Padding="14,10" BorderBrush="#FF4D4D" BorderThickness="2">
+                                <TextBlock x:Name="txtKeyStatus" FontSize="12.5" FontWeight="Bold" Foreground="#FF4D4D" FontFamily="Segoe UI" TextWrapping="Wrap" Text="HỆ THỐNG GIÁM SÁT: Chưa có cặp khóa active trong phiên làm việc hiện tại."/>
+                            </Border>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                                <Button Content="💾  LƯU CẶP KHÓA VỀ MÁY (.PUB / .PRI)" x:Name="btnSaveKeys" Style="{StaticResource BtnSuccess}" Click="BtnSaveKeys_Click" IsEnabled="False" Height="38"/>
+                            </StackPanel>
                         </StackPanel>
 
-                        <Border Background="#E3F2FD" CornerRadius="7" Padding="16" Margin="0,0,0,12">
-                            <StackPanel>
-                                <TextBlock Text="📢 THAM SỐ CÔNG KHAI (Nhập thủ công hoặc Sinh tự động)" FontWeight="Bold" Foreground="#1565C0" FontSize="13" Margin="0,0,0,10"/>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Style="{StaticResource SectionHeader}" Text="📢 GIÁ TRỊ CHI TIẾT CỦA CÁC THAM SỐ KHÓA"/>
+                            <Border Background="#000A14" CornerRadius="8" Padding="18" BorderBrush="#005F87" BorderThickness="2">
+                                <StackPanel>
+                                    <TextBlock Text="q — Số nguyên tố lớn (Modulus):" Style="{StaticResource LblField}"/>
+                                    <TextBox x:Name="txtQ" Height="62" Style="{StaticResource TxtEditable}"/>
 
-                                <TextBlock Text="q — Số nguyên tố (Mô-đun):" Style="{StaticResource LblField}"/>
-                                <TextBox x:Name="txtQ" Height="50" Style="{StaticResource TxtEditable}"/>
+                                    <TextBlock Text="a — Căn nguyên thủy của số nguyên tố q (g):" Style="{StaticResource LblField}"/>
+                                    <TextBox x:Name="txtA" Height="38" Style="{StaticResource TxtEditable}"/>
 
-                                <TextBlock Text="a — Căn nguyên thủy mod q (g):" Style="{StaticResource LblField}"/>
-                                <TextBox x:Name="txtA" Height="34" Style="{StaticResource TxtEditable}"/>
+                                    <TextBlock Text="X_A — Khóa bí mật dùng để ký (Private Key) [Bảo mật nghiêm ngặt]:" Style="{StaticResource LblField}" Foreground="#FF9F43"/>
+                                    <TextBox x:Name="txtXA" Height="62" Style="{StaticResource TxtEditable}" BorderBrush="#FF9F43" Background="#140A00"/>
 
-                                <TextBlock Text="X_A — Khóa bí mật (Cần nhập để tạo Y_A thủ công):" Style="{StaticResource LblField}" Foreground="#B71C1C"/>
-                                <TextBox x:Name="txtXA" Height="50" Style="{StaticResource TxtEditable}" Background="#FFF5F5"/>
-
-                                <TextBlock Text="Y_A — Khóa công khai (Sẽ tự tính toán nếu bấm Áp Dụng Thủ Công):" Style="{StaticResource LblField}"/>
-                                <TextBox x:Name="txtYA" Height="50" Style="{StaticResource TxtReadonly}"/>
-                            </StackPanel>
-                        </Border>
-                        <TextBlock x:Name="txtKeyStatus" FontStyle="Italic" Foreground="#2E7D32" FontWeight="Bold"/>
-                    </StackPanel>
+                                    <TextBlock Text="Y_A — Khóa công khai dùng để xác thực (Public Key):" Style="{StaticResource LblField}" Foreground="#00FF87"/>
+                                    <TextBox x:Name="txtYA" Height="62" Style="{StaticResource TxtReadonly}" BorderBrush="#00FF87" Background="#00140A"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem FontSize="13" FontWeight="SemiBold" Padding="12,6" Header="✍ Ký Số">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="22,16">
-                        <TextBlock Text="📝 Thông điệp cần ký (M - Chấp nhận nhập chuỗi hoặc số đề bài):" Style="{StaticResource LblField}"/>
-                        <TextBox x:Name="txtMsgSign" Height="70" Style="{StaticResource TxtEditable}"/>
+            <TabItem Style="{StaticResource TabItemStyle}" Header="✍️  KÝ SỐ">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#0A0F1D">
+                    <Grid Margin="24,24,24,24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="24"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="🎲 Tham số ngẫu nhiên k (Để trống nếu muốn sinh ngẫu nhiên tự động):" Style="{StaticResource LblField}" Foreground="#E65100"/>
-                        <TextBox x:Name="txtKInput" Height="34" Style="{StaticResource TxtEditable}" Background="#FFF8E1"/>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Style="{StaticResource SectionHeader}" Text="📄 NGUỒN DỮ LIỆU ĐẦU VÀO ĐỂ KÝ"/>
+                            <Border Background="#000A14" CornerRadius="8" Padding="16" Margin="0,0,0,16" BorderBrush="#005F87" BorderThickness="2">
+                                <StackPanel>
+                                    <TextBlock Text="PHƯƠNG THỨC 1: Tải tệp tin hệ thống (Ảnh / Văn bản PDF)" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12.5" Margin="0,0,0,12"/>
+                                    <WrapPanel>
+                                        <Button Content="🖼️  Tải dữ liệu Ảnh (.png/.jpg)" x:Name="btnLoadImageSign" Style="{StaticResource BtnSecondary}" Click="BtnLoadImageSign_Click" Margin="0,0,10,8"/>
+                                        <Button Content="📋  Tải tài liệu PDF" x:Name="btnLoadPdfSign" Style="{StaticResource BtnSecondary}" Click="BtnLoadPdfSign_Click" Margin="0,0,0,8"/>
+                                    </WrapPanel>
 
-                        <TextBlock Text="# Giá trị băm M hoặc mã SHA-256 số nguyên:" Style="{StaticResource LblField}" Foreground="#5C6BC0"/>
-                        <TextBox x:Name="txtSignHash" Height="34" Style="{StaticResource TxtReadonly}" Foreground="#5C6BC0"/>
+                                    <Border x:Name="borderFilePreviewSign" Background="#001424" CornerRadius="6" Padding="12,10" Margin="0,10,0,0" BorderBrush="#00F5FF" BorderThickness="2" Visibility="Collapsed">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock x:Name="txtFileIconSign" Text="📄" FontSize="26" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock x:Name="txtFileNameSign" Foreground="#FFFFFF" FontSize="13" FontWeight="Bold" FontFamily="Segoe UI"/>
+                                                <TextBlock x:Name="txtFileSizeSign" Foreground="#33CFFF" FontSize="11" FontWeight="Bold"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                    <TextBlock x:Name="txtFileHashSign" Foreground="#00FFD1" FontSize="11.5" FontWeight="Bold" Margin="0,8,0,0" FontFamily="Consolas" TextWrapping="Wrap" Visibility="Collapsed"/>
+                                </StackPanel>
+                            </Border>
 
-                        <Button Content="✍ Ký Thông Điệp" x:Name="btnSign" Style="{StaticResource BtnPrimary}" Click="BtnSign_Click" HorizontalAlignment="Center" Margin="0,14,0,14"/>
+                            <TextBlock Text="PHƯƠNG THỨC 2: Ký chuỗi thông điệp hoặc ký số đề bài trực tiếp:" Foreground="#A0C0D5" FontSize="12" FontWeight="Bold" Margin="0,4,0,8"/>
+                            <TextBlock Text="Nội dung thông điệp văn bản M (Hoặc số nguyên M):" Style="{StaticResource LblField}"/>
+                            <TextBox x:Name="txtMsgSign" Height="80" Style="{StaticResource TxtEditable}"/>
 
-                        <Border Background="#E8F5E9" CornerRadius="7" Padding="16">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Text="📜 CHỮ KÝ SỐ ĐẦU RA" FontWeight="Bold" Foreground="#2E7D32" FontSize="13" Margin="0,0,0,10"/>
-                                <TextBlock Grid.Row="1" Text="r = a^k mod q:" Style="{StaticResource LblField}"/>
-                                <TextBox Grid.Row="2" x:Name="txtSignR" Height="34" Style="{StaticResource TxtReadonly}"/>
-                                <TextBlock Grid.Row="3" Text="s = k⁻¹ · (M − X_A·r) mod (q−1):" Style="{StaticResource LblField}"/>
-                                <TextBox Grid.Row="4" x:Name="txtSignS" Height="34" Style="{StaticResource TxtReadonly}"/>
-                                <TextBlock Grid.Row="5" Text="✨ Chữ ký block dạng chuỗi gộp:" Style="{StaticResource LblField}"/>
-                                <TextBox Grid.Row="6" x:Name="txtSignatureBlock" Height="40" Style="{StaticResource TxtReadonly}" Foreground="#1B5E20" FontWeight="SemiBold"/>
-                            </Grid>
-                        </Border>
-                        <Separator Margin="0,12"/>
-                        <Button Content="💾 Lưu Chữ Ký Số (.sig)" x:Name="btnSaveSignature" Style="{StaticResource BtnTransfer}" Click="BtnSaveSignature_Click" HorizontalAlignment="Right"/>
-                    </StackPanel>
+                            <TextBlock Text="Số ngẫu nhiên ký k (Điều kiện: 1 &lt; k &lt; q-1 và GCD(k, q-1)=1, bỏ trống tự động sinh):" Style="{StaticResource LblField}" Foreground="#FF9F43"/>
+                            <TextBox x:Name="txtKInput" Height="36" Style="{StaticResource TxtEditable}" BorderBrush="#FF9F43" Background="#140A00"/>
+
+                            <TextBlock Text="Giá trị đại diện băm số học thực tế đưa vào toán học ký:" Style="{StaticResource LblField}" Foreground="#00FFD1"/>
+                            <TextBox x:Name="txtSignHash" Height="36" Style="{StaticResource TxtReadonly}"/>
+
+                            <Button Content="✍️  THỰC HIỆN KÝ SỐ ĐIỆN TỬ" x:Name="btnSign" Style="{StaticResource BtnPrimary}" Click="BtnSign_Click" HorizontalAlignment="Stretch" Margin="0,16,0,0" Height="42"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Style="{StaticResource SectionHeader}" Text="📜 CHỮ KÝ SỐ ĐẦU RA (KẾT QUẢ TOÁN HỌC)"/>
+                            <Border Background="#000A14" CornerRadius="8" Padding="18" Margin="0,0,0,16" BorderBrush="#005F87" BorderThickness="2">
+                                <StackPanel>
+                                    <TextBlock Text="Thành phần chữ ký số r (r = a^k mod q):" Style="{StaticResource LblField}" Foreground="#00FF87"/>
+                                    <TextBox x:Name="txtSignR" Height="38" Style="{StaticResource TxtReadonly}" BorderBrush="#00FF87" Foreground="#00FF87"/>
+
+                                    <TextBlock Text="Thành phần chữ ký số s (s = k⁻¹ · (M − X_A·r) mod (q−1)):" Style="{StaticResource LblField}" Foreground="#00FF87"/>
+                                    <TextBox x:Name="txtSignS" Height="38" Style="{StaticResource TxtReadonly}" BorderBrush="#00FF87" Foreground="#00FF87"/>
+
+                                    <TextBlock Text="Khối chữ ký gộp dạng chuỗi nhị phân mã hóa dữ liệu:" Style="{StaticResource LblField}"/>
+                                    <TextBox x:Name="txtSignatureBlock" Height="46" Style="{StaticResource TxtReadonly}" Foreground="#00F5FF" FontWeight="Black" Background="#000D1A" BorderBrush="#00F5FF"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Background="#05101A" CornerRadius="8" Padding="16" Margin="0,0,0,16" BorderBrush="#00F5FF" BorderThickness="1.5">
+                                <StackPanel>
+                                    <TextBlock Text="ĐIỀU HƯỚNG DỮ LIỆU NHANH" Foreground="#33CFFF" FontSize="12" FontWeight="Black" Margin="0,0,0,8"/>
+                                    <Button Content="→  Chuyển toàn bộ dữ liệu ký sang Tab Xác Thực công khai" x:Name="btnTransferToVerify" Style="{StaticResource BtnSecondary}" Click="BtnTransferToVerify_Click" HorizontalAlignment="Stretch" IsEnabled="False" Height="38"/>
+                                </StackPanel>
+                            </Border>
+                            <Button Content="💾  XUẤT FILE CHỮ KÝ (.SIG)" x:Name="btnSaveSignature" Style="{StaticResource BtnSuccess}" Click="BtnSaveSignature_Click" HorizontalAlignment="Right" IsEnabled="False" Height="38"/>
+                        </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem FontSize="13" FontWeight="SemiBold" Padding="12,6" Header="✅ Xác Thực">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="22,16">
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <Button Content="📂 Nạp Khóa Công Khai (.pub)" Style="{StaticResource BtnSecondary}" Click="BtnLoadPublicKey_Click" Margin="0,0,14,0"/>
-                            <Button Content="📂 Nạp File Chữ Ký (.sig)" Style="{StaticResource BtnSecondary}" Click="BtnLoadSignatureFile_Click"/>
+            <TabItem Style="{StaticResource TabItemStyle}" Header="✅  XÁC THỰC CHỮ KÝ">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#0A0F1D">
+                    <Grid Margin="24,24,24,24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="24"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Style="{StaticResource SectionHeader}" Text="📂 NẠP THÔNG TIN KIỂM CHỨNG CHỨNG THƯ"/>
+                            <Border Background="#000A14" CornerRadius="8" Padding="16" Margin="0,0,0,16" BorderBrush="#005F87" BorderThickness="2">
+                                <StackPanel>
+                                    <TextBlock Text="Nạp các văn bản chữ ký từ bên ngoài:" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12.5" Margin="0,0,0,12"/>
+                                    <WrapPanel>
+                                        <Button Content="🔑  Nạp Khóa công khai (.pub)" Style="{StaticResource BtnSecondary}" Click="BtnLoadPublicKey_Click" Margin="0,0,10,8"/>
+                                        <Button Content="📄  Nạp Chữ Ký gốc (.sig)" Style="{StaticResource BtnSecondary}" Click="BtnLoadSignatureFile_Click" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Background="#000A14" CornerRadius="8" Padding="16" Margin="0,0,0,16" BorderBrush="#005F87" BorderThickness="2">
+                                <StackPanel>
+                                    <TextBlock Text="Tải tệp tin cần kiểm tra xem có bị chỉnh sửa hay không:" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12.5" Margin="0,0,0,12"/>
+                                    <WrapPanel>
+                                        <Button Content="🖼️  Tải Ảnh kiểm chứng" x:Name="btnLoadImageVerify" Style="{StaticResource BtnSecondary}" Click="BtnLoadImageVerify_Click" Margin="0,0,10,8"/>
+                                        <Button Content="📋  Tải PDF kiểm chứng" x:Name="btnLoadPdfVerify" Style="{StaticResource BtnSecondary}" Click="BtnLoadPdfVerify_Click" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                    <Border x:Name="borderFilePreviewVerify" Background="#001424" CornerRadius="6" Padding="12,10" Margin="0,10,0,0" BorderBrush="#00F5FF" BorderThickness="2" Visibility="Collapsed">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock x:Name="txtFileIconVerify" Text="📄" FontSize="26" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock x:Name="txtFileNameVerify" Foreground="#FFFFFF" FontSize="13" FontWeight="Bold" FontFamily="Segoe UI"/>
+                                                <TextBlock x:Name="txtFileSizeVerify" Foreground="#33CFFF" FontSize="11" FontWeight="Bold"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                    <TextBlock x:Name="txtFileHashVerify" Foreground="#00FFD1" FontSize="11.5" FontWeight="Bold" Margin="0,8,0,0" FontFamily="Consolas" TextWrapping="Wrap" Visibility="Collapsed"/>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="Hoặc kiểm tra thông điệp văn bản / số nhập tay:" Foreground="#A0C0D5" FontSize="12" FontWeight="Bold" Margin="0,4,0,8"/>
+                            <TextBlock Text="Nội dung thông điệp M cần kiểm tra toàn vẹn:" Style="{StaticResource LblField}"/>
+                            <TextBox x:Name="txtMsgVerify" Height="80" Style="{StaticResource TxtEditable}"/>
+
+                            <TextBlock Text="Nhập thành phần chữ ký số r kiểm chứng:" Style="{StaticResource LblField}"/>
+                            <TextBox x:Name="txtVerifyR" Height="36" Style="{StaticResource TxtEditable}"/>
+
+                            <TextBlock Text="Nhập thành phần chữ ký số s kiểm chứng:" Style="{StaticResource LblField}"/>
+                            <TextBox x:Name="txtVerifyS" Height="36" Style="{StaticResource TxtEditable}"/>
+
+                            <Button Content="🔍  KÍCH HOẠT XÁC THỰC CHỮ KÝ" x:Name="btnVerify" Style="{StaticResource BtnPrimary}" Click="BtnVerify_Click" HorizontalAlignment="Stretch" Margin="0,16,0,0" Height="42"/>
                         </StackPanel>
-                        <TextBlock Text="📝 Thông điệp cần xác thực:" Style="{StaticResource LblField}"/>
-                        <TextBox x:Name="txtMsgVerify" Height="70" Style="{StaticResource TxtEditable}"/>
-                        <TextBlock Text="r (Thành phần chữ ký):" Style="{StaticResource LblField}"/>
-                        <TextBox x:Name="txtVerifyR" Height="34" Style="{StaticResource TxtEditable}"/>
-                        <TextBlock Text="s (Thành phần chữ ký):" Style="{StaticResource LblField}"/>
-                        <TextBox x:Name="txtVerifyS" Height="34" Style="{StaticResource TxtEditable}"/>
-                        <Button Content="🔍 Xác Thực Chữ Ký" x:Name="btnVerify" Style="{StaticResource BtnPrimary}" Click="BtnVerify_Click" HorizontalAlignment="Left" Margin="0,14,0,14"/>
-                        <Border Background="#F5F5F5" CornerRadius="7" Padding="16" Margin="0,0,0,12">
-                            <StackPanel>
-                                <TextBlock Text="📊 CHI TIẾT KIỂM TRA TOÁN HỌC" FontWeight="Bold" Foreground="#37474F" FontSize="13" Margin="0,0,0,10"/>
-                                <TextBox x:Name="txtVHash" Height="34" Style="{StaticResource TxtReadonly}" Margin="0,5"/>
-                                <TextBox x:Name="txtVLHS" Height="34" Style="{StaticResource TxtReadonly}" Margin="0,5"/>
-                                <TextBox x:Name="txtVRHS" Height="34" Style="{StaticResource TxtReadonly}" Margin="0,5"/>
-                            </StackPanel>
-                        </Border>
-                        <Border x:Name="borderResult" CornerRadius="8" Padding="20" Background="#ECEFF1">
-                            <TextBlock x:Name="txtResult" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" Foreground="#78909C" Text="— Chưa xác thực —"/>
-                        </Border>
-                    </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Style="{StaticResource SectionHeader}" Text="📊 PHÂN TÍCH SO SÁNH VÀ KẾT QUẢ ĐỐI CHIẾU"/>
+                            <Border Background="#000A14" CornerRadius="8" Padding="18" Margin="0,0,0,16" BorderBrush="#005F87" BorderThickness="2">
+                                <StackPanel>
+                                    <TextBlock Text="Giá trị đại diện số học M hệ thống sử dụng:" Style="{StaticResource LblField}"/>
+                                    <TextBox x:Name="txtVHash" Height="36" Style="{StaticResource TxtReadonly}"/>
+
+                                    <TextBlock Text="Vế trái: V₁ = a^M mod q:" Style="{StaticResource LblField}" Foreground="#00F5FF"/>
+                                    <TextBox x:Name="txtVLHS" Height="36" Style="{StaticResource TxtReadonly}" Foreground="#00F5FF" BorderBrush="#00F5FF"/>
+
+                                    <TextBlock Text="Vế phải: V₂ = (Y_A^r · r^s) mod q:" Style="{StaticResource LblField}" Foreground="#FF9F43"/>
+                                    <TextBox x:Name="txtVRHS" Height="36" Style="{StaticResource TxtReadonly}" Foreground="#FF9F43" BorderBrush="#FF9F43"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border x:Name="borderResult" CornerRadius="10" Padding="24" Background="#000F1A" BorderBrush="#00F5FF" BorderThickness="3">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock x:Name="txtResultIcon" Text="⏳" FontSize="42" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                    <TextBlock x:Name="txtResult" FontSize="15" FontWeight="Black" HorizontalAlignment="Center" TextAlignment="Center" Foreground="#A0C0D5" Text="— ĐANG CHỜ DỮ LIỆU XÁC THỰC —" FontFamily="Segoe UI" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Style="{StaticResource TabItemStyle}" Header="📘  HƯỚNG DẪN">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#0A0F1D">
+                    <Grid Margin="30,24,30,24">
+                        <StackPanel>
+                            <TextBlock Text="QUY TRÌNH VẬN HÀNH HỆ THỐNG CHỮ KÝ SỐ ELGAMAL" FontSize="18" FontWeight="Black" Foreground="#00F5FF" Margin="0,0,0,4"/>
+                            <TextBlock Text="Tài liệu hướng dẫn thực hành và kiểm thử hệ thống cho học phần An Toàn Bảo Mật Thông Tin" FontSize="12" FontStyle="Italic" Foreground="#6688A5" Margin="0,0,0,20"/>
+
+                            <Border BorderBrush="#005F87" BorderThickness="0,0,0,1" Margin="0,0,0,16"/>
+
+                            <TextBlock Text="PHẦN I: KHỔI TẠO KHÓA (KEY GENERATION)" FontSize="14" FontWeight="Bold" Foreground="#00FF87" Margin="0,8,0,8"/>
+                            <Border Background="#000A14" CornerRadius="6" Padding="16" Margin="0,0,0,16" BorderBrush="#005F87" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource HelpText}">
+                                        <Run Text="👉 Chế độ tự động (Khuyến nghị): " FontWeight="Bold" Foreground="#00F5FF"/>
+                                        <Run Text="Tại Tab 'TẠO KHÓA', chọn kích thước bit (mặc định 512-bit). Nhấn nút "/>
+                                        <Run Text="⚡ BẮT ĐẦU TỰ ĐỘNG SINH KHÓA" FontWeight="Bold" Foreground="#00F5FF"/>
+                                        <Run Text=". Hệ thống sẽ tự tìm một số nguyên tố an toàn (Safe Prime) "/>
+                                        <Run Text="q" FontWeight="Bold" FontStyle="Italic"/>
+                                        <Run Text=", căn nguyên thủy "/>
+                                        <Run Text="a" FontWeight="Bold" FontStyle="Italic"/>
+                                        <Run Text=", chọn ngẫu nhiên khóa mật "/>
+                                        <Run Text="X_A" FontWeight="Bold" FontStyle="Italic"/>
+                                        <Run Text=" và tính ra khóa công khai "/>
+                                        <Run Text="Y_A" FontWeight="Bold" FontStyle="Italic"/>
+                                        <Run Text="."/>
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource HelpText}" Margin="0">
+                                        <Run Text="👉 Chế độ nhập tay (Giải đề bài tập): " FontWeight="Bold" Foreground="#FF9F43"/>
+                                        <Run Text="Nhập thủ công các số nguyên vào 3 ô: "/>
+                                        <Run Text="q (Modulus)" FontWeight="Bold"/>
+                                        <Run Text=", "/>
+                                        <Run Text="a (Căn nguyên thủy)" FontWeight="Bold"/>
+                                        <Run Text=" và "/>
+                                        <Run Text="X_A (Khóa bí mật)" FontWeight="Bold"/>
+                                        <Run Text=". Sau đó nhấn nút "/>
+                                        <Run Text="📐 ÁP DỤNG THÔNG SỐ THỦ CÔNG" FontWeight="Bold" Foreground="#FF4D4D"/>
+                                        <Run Text=". Hệ thống sẽ tự tính khóa công khai Y_A = a^(X_A) mod q."/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="PHẦN II: TẠO CHỮ KÝ SỐ (SIGNING PROCESS)" FontSize="14" FontWeight="Bold" Foreground="#00FF87" Margin="0,8,0,8"/>
+                            <Border Background="#000A14" CornerRadius="6" Padding="16" Margin="0,0,0,16" BorderBrush="#005F87" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource HelpText}">
+                                        <Run Text="Bước 1: " FontWeight="Bold" Foreground="#00F5FF"/>
+                                        <Run Text="Chuyển sang Tab 'KÝ SỐ DỮ LIỆU'. Bạn có thể chọn tải file (Ảnh/PDF) để ký hoặc nhập một văn bản, một số nguyên M bất kỳ vào ô thông điệp."/>
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource HelpText}">
+                                        <Run Text="Bước 2 (Tùy chọn đề bài): " FontWeight="Bold" Foreground="#FF9F43"/>
+                                        <Run Text="Nếu đề thi yêu cầu chọn số ngẫu nhiên "/>
+                                        <Run Text="k" FontWeight="Bold" FontStyle="Italic"/>
+                                        <Run Text=" cụ thể, hãy nhập số đó vào ô k. Nếu để trống, hệ thống sẽ tự động chọn ngẫu nhiên số k hợp lệ thỏa mãn nguyên tố cùng nhau với (q-1)."/>
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource HelpText}" Margin="0">
+                                        <Run Text="Bước 3: " FontWeight="Bold" Foreground="#00F5FF"/>
+                                        <Run Text="Nhấn nút "/>
+                                        <Run Text="✍️ THỰC HIỆN KÝ SỐ ĐIỆN TỬ" FontWeight="Bold" Foreground="#00F5FF"/>
+                                        <Run Text=". Hệ thống tính toán và trả ra cặp chữ ký "/>
+                                        <Run Text="(r, s)" FontWeight="Bold"/>
+                                        <Run Text=". Bạn có thể bấm xuất file .sig hoặc bấm "/>
+                                        <Run Text="Chuyển sang Tab Xác Thực" FontWeight="Bold" Foreground="#00FF87"/>
+                                        <Run Text=" để kiểm chứng nhanh."/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="PHẦN III: XÁC THỰC CHỮ KÝ SỐ (VERIFICATION PROCESS)" FontSize="14" FontWeight="Bold" Foreground="#00FF87" Margin="0,8,0,8"/>
+                            <Border Background="#000A14" CornerRadius="6" Padding="16" Margin="0,0,0,8" BorderBrush="#005F87" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource HelpText}">
+                                        <Run Text="Trường hợp 1 (Liên tuyến từ Tab Ký Số): " FontWeight="Bold" Foreground="#00F5FF"/>
+                                        <Run Text="Nếu bạn dùng nút điều hướng nhanh từ bước trước, toàn bộ cấu hình khóa và dữ liệu băm của thông điệp sẽ tự điền. Bạn chỉ cần nhấn nút "/>
+                                        <Run Text="🔍 KÍCH HOẠT XÁC THỰC CHỮ KÝ" FontWeight="Bold" Foreground="#00F5FF"/>
+                                        <Run Text="."/>
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource HelpText}">
+                                        <Run Text="Trường hợp 2 (Nạp file kiểm thử độc lập): " FontWeight="Bold" Foreground="#FF9F43"/>
+                                        <Run Text="Nhấn 'Nạp Khóa công khai (.pub)' để lấy thông tin khóa người gửi. Nhấn 'Nạp Chữ Ký gốc (.sig)'. Sau đó, tải tệp tin cần kiểm chứng lên hệ thống."/>
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource HelpText}" Margin="0">
+                                        <Run Text="🎯 Nguyên lý đánh giá: " FontWeight="Bold" Foreground="#FFFFFF"/>
+                                        <Run Text="Hệ thống thực hiện so sánh hai vế toán học: Vế trái V₁ = a^M mod q và Vế phải V₂ = (Y_A^r * r^s) mod q. Nếu "/>
+                                        <Run Text="V₁ = V₂" FontWeight="Bold" Foreground="#00FF87"/>
+                                        <Run Text=", màn hình hiển thị thông báo "/>
+                                        <Run Text="CHỮ KÝ HỢP LỆ (Màu xanh neon)" FontWeight="Bold" Foreground="#00FF87"/>
+                                        <Run Text=". Nếu dữ liệu bị can thiệp dù chỉ 1 ký tự, hai vế sẽ lệch nhau và hệ thống báo hủy bỏ tính toàn vẹn ngay lập tức."/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </TabItem>
         </TabControl>
+
+        <Border Grid.Row="2" Background="#020406" BorderBrush="#005F87" BorderThickness="0,2,0,0">
+            <Grid Margin="18,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="txtStatusBar" Text="Hệ thống đã sẵn sàng làm việc." Foreground="#FFFFFF" FontSize="11.5" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Segoe UI"/>
+                <TextBlock Grid.Column="1" Text="ELGAMAL CORE ENGINE v2.5 · SECURE HASH SHA-256" Foreground="#6688A5" FontSize="11.5" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Segoe UI"/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
@@ -25,7 +23,6 @@ namespace Elgamal_Signature_CS
     {
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
 
-        // Danh sách số nguyên tố nhỏ dùng để sàng lọc nhanh, tăng tốc 10 lần thời gian sinh số nguyên tố
         private static readonly int[] SmallPrimes = {
             2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
             101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199
@@ -37,25 +34,28 @@ namespace Elgamal_Signature_CS
             BigInteger a = FindGeneratorForSafePrime(q);
             BigInteger xa = GenerateRandomInRange(2, q - 2);
             BigInteger ya = BigInteger.ModPow(a, xa, q);
-
             return new ElGamalKeyPair { Q = q, A = a, XA = xa, YA = ya };
         }
 
         public static ElGamalSig Sign(string message, ElGamalKeyPair key)
         {
+            BigInteger hash = HashToBigInteger(message);
+            return SignHash(hash, key);
+        }
+
+        public static ElGamalSig SignHash(BigInteger hash, ElGamalKeyPair key)
+        {
             BigInteger q = key.Q;
             BigInteger a = key.A;
             BigInteger xa = key.XA;
             BigInteger qMinus1 = q - 1;
-
-            BigInteger hash = HashToBigInteger(message);
             BigInteger k, r, s;
             int tries = 0;
 
             do
             {
-                if (++tries > 10_000)
-                    throw new InvalidOperationException("Không thể tạo chữ ký số. Hãy thử lại.");
+                if (++tries > 20_000)
+                    throw new InvalidOperationException("Không thể tạo chữ ký trong số lượt cho phép. Vui lòng sinh lại cặp khóa mới.");
 
                 do { k = GenerateRandomInRange(2, qMinus1 - 1); }
                 while (GCD(k, qMinus1) != 1);
@@ -63,10 +63,8 @@ namespace Elgamal_Signature_CS
                 r = BigInteger.ModPow(a, k, q);
                 BigInteger kInv = ModInverse(k, qMinus1);
                 BigInteger xar = (xa * r) % qMinus1;
-
                 BigInteger diff = (hash - xar) % qMinus1;
                 if (diff < 0) diff += qMinus1;
-
                 s = (kInv * diff) % qMinus1;
             }
             while (s == 0);
@@ -77,20 +75,32 @@ namespace Elgamal_Signature_CS
         public static (BigInteger hash, BigInteger lhs, BigInteger rhs, bool valid)
             VerifyWithDetails(string message, ElGamalSig sig, ElGamalKeyPair key)
         {
+            BigInteger hash;
+            if (BigInteger.TryParse(message, out BigInteger parsedNum) && parsedNum < key.Q) hash = parsedNum;
+            else hash = HashToBigInteger(message);
+            var (lhs, rhs, valid) = VerifyWithHash(hash, sig, key);
+            return (hash, lhs, rhs, valid);
+        }
+
+        public static (BigInteger lhs, BigInteger rhs, bool valid)
+            VerifyWithHash(BigInteger hash, ElGamalSig sig, ElGamalKeyPair key)
+        {
             BigInteger q = key.Q;
             BigInteger a = key.A;
             BigInteger ya = key.YA;
             BigInteger r = sig.R;
             BigInteger s = sig.S;
 
-            BigInteger hash = HashToBigInteger(message);
+            if (r <= 0 || r >= q || s <= 0 || s >= (q - 1))
+                return (0, 0, false);
+
             BigInteger lhs = BigInteger.ModPow(a, hash, q);
             BigInteger ya_r = BigInteger.ModPow(ya, r, q);
             BigInteger r_s = BigInteger.ModPow(r, s, q);
             BigInteger rhs = (ya_r * r_s) % q;
 
-            bool valid = (r > 0 && r < q) && (s > 0 && s < q - 1) && (lhs == rhs);
-            return (hash, lhs, rhs, valid);
+            bool valid = (lhs == rhs);
+            return (lhs, rhs, valid);
         }
 
         public static BigInteger HashToBigInteger(string message)
@@ -100,43 +110,39 @@ namespace Elgamal_Signature_CS
             return new BigInteger(raw, isUnsigned: true, isBigEndian: false);
         }
 
-        // TỐI ƯU HÓA: Sàng lọc chia thử trước khi chạy Miller-Rabin đắt đỏ
         private static bool IsPrimeOptimized(BigInteger n)
         {
+            if (n < 2) return false;
             foreach (int p in SmallPrimes)
             {
                 if (n == p) return true;
                 if (n % p == 0) return false;
             }
-            return MillerRabin(n, 8); // Giảm số vòng lặp xuống 8 vẫn đảm bảo độ chính xác an toàn
-        }
-
-        public static bool IsSafePrime(BigInteger p)
-        {
-            if (p < 5) return false;
-            if (!IsPrimeOptimized(p)) return false;
-            BigInteger q = (p - 1) / 2;
-            return IsPrimeOptimized(q);
+            return MillerRabin(n, 16);
         }
 
         private static BigInteger GenerateSafePrime(int bitLength)
         {
+            // qPrime là một số nguyên tố lớn, q = 2 * qPrime + 1 cũng nguyên tố
             while (true)
             {
                 BigInteger qPrime = GenerateRandomPrime(bitLength - 1);
-                BigInteger p = 2 * qPrime + 1;
-                if (IsPrimeOptimized(p)) return p;
+                BigInteger q = 2 * qPrime + 1;
+                if (IsPrimeOptimized(q)) return q;
             }
         }
 
         private static BigInteger FindGeneratorForSafePrime(BigInteger p)
         {
+            // Đối với số nguyên tố an toàn p = 2q' + 1, các ước nguyên tố của p-1 là 2 và q'.
+            // Phần tử g là căn nguyên thủy khi và chỉ khi: g^2 != 1 mod p VÀ g^q' != 1 mod p.
             BigInteger qPrime = (p - 1) / 2;
-            // Thử nhanh các giá trị phần tử sinh phổ biến
-            foreach (BigInteger g in new BigInteger[] { 2, 3, 5, 6, 7, 10, 11, 13, 14, 15 })
+            BigInteger g = 2;
+            while (g < p)
             {
-                if (g >= p) continue;
-                if (BigInteger.ModPow(g, 2, p) != 1 && BigInteger.ModPow(g, qPrime, p) != 1) return g;
+                if (BigInteger.ModPow(g, 2, p) != 1 && BigInteger.ModPow(g, qPrime, p) != 1)
+                    return g;
+                g++;
             }
             return 2;
         }
@@ -146,13 +152,13 @@ namespace Elgamal_Signature_CS
             while (true)
             {
                 BigInteger n = GenerateRandomBits(bitLength);
-                n |= BigInteger.One;
-                n |= BigInteger.One << (bitLength - 1);
+                n |= BigInteger.One; // Đảm bảo số lẻ
+                n |= BigInteger.One << (bitLength - 1); // Đảm bảo đúng chiều dài bit yêu cầu
                 if (IsPrimeOptimized(n)) return n;
             }
         }
 
-        public static bool MillerRabin(BigInteger n, int rounds = 8)
+        public static bool MillerRabin(BigInteger n, int rounds = 16)
         {
             if (n < 2) return false;
             if (n == 2 || n == 3) return true;
@@ -188,11 +194,12 @@ namespace Elgamal_Signature_CS
 
         public static BigInteger ModInverse(BigInteger a, BigInteger m)
         {
-            ExtendedGCD(((a % m) + m) % m, m, out BigInteger g, out BigInteger x, out _);
+            ExtendedGCD(((a % m) + m) % m, m, out _, out BigInteger x, out _);
             return (x % m + m) % m;
         }
 
-        private static void ExtendedGCD(BigInteger a, BigInteger b, out BigInteger g, out BigInteger x, out BigInteger y)
+        private static void ExtendedGCD(BigInteger a, BigInteger b,
+            out BigInteger g, out BigInteger x, out BigInteger y)
         {
             if (a == 0) { g = b; x = 0; y = 1; return; }
             ExtendedGCD(b % a, a, out g, out BigInteger x1, out BigInteger y1);
@@ -201,6 +208,7 @@ namespace Elgamal_Signature_CS
 
         public static BigInteger GenerateRandomInRange(BigInteger min, BigInteger max)
         {
+            if (min > max) throw new ArgumentException("Giá trị nhỏ nhất không thể lớn hơn giá trị lớn nhất.");
             BigInteger range = max - min;
             int byteCount = range.GetByteCount(isUnsigned: true) + 1;
             byte[] buf = new byte[byteCount];
