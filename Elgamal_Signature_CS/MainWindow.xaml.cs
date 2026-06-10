@@ -4,6 +4,8 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Win32;
 
@@ -19,8 +21,10 @@ namespace Elgamal_Signature_CS
         private BigInteger? _loadedQ;
         private BigInteger? _loadedA;
         private BigInteger? _loadedYA;
-        private string _fileOriginalMessage = string.Empty;
+        private BigInteger? _originalHash;
         private BigInteger? _fileOriginalYA;
+
+        private bool _hasTransferredContext = false;
 
         // Quản lý mảng byte của tệp tin đầu vào
         private byte[]? _signFileBytes;
@@ -33,7 +37,41 @@ namespace Elgamal_Signature_CS
             InitializeComponent();
         }
 
-        // ==================== TAB 1: TẠO KHÓA ====================
+        // ==================== CỤM ĐIỀU HƯỚNG CỬA SỔ (WINDOW CONTROLS) ====================
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+                BtnMaximize_Click(sender, e);
+            else
+                this.DragMove();
+        }
+
+        private void BtnLengthCheck(object sender, RoutedEventArgs e) { }
+
+        private void BtnMinimize_Click(object sender, RoutedEventArgs e) => this.WindowState = WindowState.Minimized;
+
+        private void BtnMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+            {
+                this.WindowState = WindowState.Normal;
+                btnMaximize.Content = "🗖";
+                btnMaximize.ToolTip = "Phóng to";
+            }
+            else
+            {
+                this.MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
+                this.MaxWidth = SystemParameters.MaximizedPrimaryScreenWidth;
+                this.WindowState = WindowState.Maximized;
+                btnMaximize.Content = "🗗";
+                btnMaximize.ToolTip = "Thu nhỏ lại";
+            }
+        }
+
+        private void BtnClose_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
+
+        // ==================== TẠO KHÓA ====================
 
         private async void BtnGenerateKeys_Click(object sender, RoutedEventArgs e)
         {
@@ -62,22 +100,158 @@ namespace Elgamal_Signature_CS
             finally { btnGenerateKeys.IsEnabled = true; }
         }
 
-        private void BtnApplyManual_Click(object sender, RoutedEventArgs e)
+        // --- CÁC HÀM VALIDATE TRỰC TIẾP CHO TỪNG Ô ---
+
+        private void ShowInlineError(TextBlock errBlock, TextBox txtBox, string msg)
+        {
+            errBlock.Text = "❌ " + msg;
+            errBlock.Visibility = Visibility.Visible;
+            txtBox.BorderBrush = BrushOf("#FF4D4D");
+        }
+
+        private void ClearInlineError(TextBlock errBlock, TextBox txtBox, string defaultColor)
+        {
+            errBlock.Visibility = Visibility.Collapsed;
+            txtBox.BorderBrush = BrushOf(defaultColor);
+        }
+
+        private void Txt_ClearError(object sender, TextChangedEventArgs e)
+        {
+            if (sender == txtQ) ClearInlineError(errQ, txtQ, "#00A2FF");
+            if (sender == txtA) ClearInlineError(errA, txtA, "#00A2FF");
+            if (sender == txtXA) ClearInlineError(errXA, txtXA, "#FF9F43");
+        }
+
+        private void TxtQ_LostFocus(object sender, RoutedEventArgs e) => ValidateQ();
+        private void TxtA_LostFocus(object sender, RoutedEventArgs e) => ValidateA();
+        private void TxtXA_LostFocus(object sender, RoutedEventArgs e) => ValidateXA();
+
+        private bool ValidateQ()
         {
             string qStr = txtQ.Text.Trim();
+            if (string.IsNullOrEmpty(qStr))
+            {
+                ShowInlineError(errQ, txtQ, "Bắt buộc phải nhập giá trị q.");
+                return false;
+            }
+            if (!BigInteger.TryParse(qStr, out BigInteger q))
+            {
+                ShowInlineError(errQ, txtQ, "q phải là số nguyên hợp lệ.");
+                return false;
+            }
+            if (q < 2)
+            {
+                ShowInlineError(errQ, txtQ, "q phải là số nguyên tố lớn hơn 1.");
+                return false;
+            }
+            if (!ElGamalCrypto.MillerRabin(q, 20))
+            {
+                ShowInlineError(errQ, txtQ, $"q = {q} không phải là số nguyên tố!");
+                return false;
+            }
+
+            ClearInlineError(errQ, txtQ, "#00A2FF");
+
+            if (!string.IsNullOrWhiteSpace(txtA.Text)) ValidateA();
+            if (!string.IsNullOrWhiteSpace(txtXA.Text)) ValidateXA();
+
+            return true;
+        }
+
+        private bool ValidateA()
+        {
             string aStr = txtA.Text.Trim();
+            if (string.IsNullOrEmpty(aStr))
+            {
+                ShowInlineError(errA, txtA, "Bắt buộc phải nhập giá trị a.");
+                return false;
+            }
+            if (!BigInteger.TryParse(aStr, out BigInteger a))
+            {
+                ShowInlineError(errA, txtA, "a phải là số nguyên hợp lệ.");
+                return false;
+            }
+
+            if (!BigInteger.TryParse(txtQ.Text.Trim(), out BigInteger q) || !ElGamalCrypto.MillerRabin(q, 20))
+            {
+                ShowInlineError(errA, txtA, "Vui lòng nhập q hợp lệ trước khi xác định a.");
+                return false;
+            }
+
+            if (a < 2 || a >= q)
+            {
+                ShowInlineError(errA, txtA, $"a phải thỏa mãn: 2 ≤ a < q (với q = {q}).");
+                return false;
+            }
+
+            if (a == 1)
+            {
+                ShowInlineError(errA, txtA, "a = 1 không hợp lệ, đây là phần tử tầm thường (trivial element).");
+                return false;
+            }
+            if (BigInteger.ModPow(a, q - 1, q) != 1)
+            {
+                ShowInlineError(errA, txtA, $"a = {a} không thỏa mãn điều kiện Fermat nhỏ (a^(q-1) mod q phải = 1).");
+                return false;
+            }
+
+            BigInteger halfOrder = (q - 1) / 2;
+            if (halfOrder > 1 && BigInteger.ModPow(a, halfOrder, q) == 1)
+            {
+                ShowInlineError(errA, txtA, $"a = {a} có bậc quá nhỏ (a^((q-1)/2) mod q = 1), không phải căn nguyên thủy tốt.");
+                return false;
+            }
+
+            ClearInlineError(errA, txtA, "#00A2FF");
+            return true;
+        }
+
+        private bool ValidateXA()
+        {
             string xaStr = txtXA.Text.Trim();
+            if (string.IsNullOrEmpty(xaStr))
+            {
+                ShowInlineError(errXA, txtXA, "Bắt buộc phải nhập giá trị X_A.");
+                return false;
+            }
+            if (!BigInteger.TryParse(xaStr, out BigInteger xa))
+            {
+                ShowInlineError(errXA, txtXA, "X_A phải là số nguyên hợp lệ.");
+                return false;
+            }
 
-            if (string.IsNullOrEmpty(qStr) || string.IsNullOrEmpty(aStr) || string.IsNullOrEmpty(xaStr))
-            { ShowWarning("Yêu cầu hệ thống: Vui lòng điền đầy đủ các tham số q, a, X_A!"); return; }
+            if (!BigInteger.TryParse(txtQ.Text.Trim(), out BigInteger q) || !ElGamalCrypto.MillerRabin(q, 20))
+            {
+                ShowInlineError(errXA, txtXA, "Vui lòng nhập q hợp lệ trước khi xác định X_A.");
+                return false;
+            }
 
-            if (!BigInteger.TryParse(qStr, out BigInteger q) ||
-                !BigInteger.TryParse(aStr, out BigInteger a) ||
-                !BigInteger.TryParse(xaStr, out BigInteger xa))
-            { ShowError("Lỗi định dạng", "Toàn bộ các tham số đầu vào bắt buộc phải là số nguyên hợp lệ."); return; }
+            BigInteger qMinus1 = q - 1;
+            if (xa <= 1 || xa >= qMinus1)
+            {
+                ShowInlineError(errXA, txtXA, $"X_A phải thỏa mãn: 1 < X_A < q-1 (với q-1 = {qMinus1}).");
+                return false;
+            }
 
-            if (xa <= 1 || xa >= q - 1)
-            { ShowWarning("Điều kiện toán học thất bại: Khóa bí mật X_A phải thỏa mãn (1 < X_A < q - 1)."); return; }
+            ClearInlineError(errXA, txtXA, "#FF9F43");
+            return true;
+        }
+
+        private void BtnApplyManual_Click(object sender, RoutedEventArgs e)
+        {
+            bool isQValid = ValidateQ();
+            bool isAValid = ValidateA();
+            bool isXAValid = ValidateXA();
+
+            if (!isQValid || !isAValid || !isXAValid)
+            {
+                ShowWarning("Dữ liệu nhập vào chưa hợp lệ. Vui lòng kiểm tra lại các thông báo lỗi màu đỏ!");
+                return;
+            }
+
+            BigInteger q = BigInteger.Parse(txtQ.Text.Trim());
+            BigInteger a = BigInteger.Parse(txtA.Text.Trim());
+            BigInteger xa = BigInteger.Parse(txtXA.Text.Trim());
 
             BigInteger ya = BigInteger.ModPow(a, xa, q);
             txtYA.Text = ya.ToString();
@@ -88,7 +262,8 @@ namespace Elgamal_Signature_CS
             txtHeaderKeyStatus.Text = "⬤  Khóa Thủ Công Active";
             txtHeaderKeyStatus.Foreground = BrushOf("#FF9F43");
             SetStatus("Đã cấu hình thông số thủ công. Khóa công khai Y_A đã tự động tính.");
-            MessageBox.Show("Áp dụng thông số đề bài thành công!\nGiá trị Y_A = a^X_A mod q đã được đồng bộ.", "Thành công");
+
+            MessageBox.Show($"Áp dụng thông số đề bài thành công!\n\n• q = {q}\n• a = {a}\n• X_A = {xa}\n• Y_A = a^X_A mod q = {ya}", "Thành công");
         }
 
         private void BtnSaveKeys_Click(object sender, RoutedEventArgs e)
@@ -155,7 +330,7 @@ namespace Elgamal_Signature_CS
                 txtFileHashSign.Visibility = Visibility.Visible;
                 txtFileHashSign.Text = $"MÃ SHA-256 ĐẠI DIỆN: {hashHex}";
 
-                txtMsgSign.Text = string.Empty; // Xóa text tĩnh khi dùng file
+                txtMsgSign.Text = string.Empty;
                 SetStatus($"Đã nạp thành công tệp tin: {fileName} ({sizeStr})");
             }
             catch (Exception ex) { ShowError("Lỗi hệ thống tập tin", ex.Message); }
@@ -163,10 +338,22 @@ namespace Elgamal_Signature_CS
 
         private async void BtnSign_Click(object sender, RoutedEventArgs e)
         {
-            if (_key == null) { ShowWarning("Hành động bị từ chối: Vui lòng khởi tạo hoặc nhập thông số khóa tại Tab 1!"); return; }
+            if (_key == null)
+            {
+                ShowWarning("Hành động bị từ chối: Vui lòng khởi tạo hoặc nhập thông số khóa tại Tab 1 trước khi ký số!");
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(txtMsgSign.Text.Trim()))
+            {
+                _signFileBytes = null;
+                _signFileName = null;
+                borderFilePreviewSign.Visibility = Visibility.Collapsed;
+                txtFileHashSign.Visibility = Visibility.Collapsed;
+            }
 
             bool signingFile = _signFileBytes != null;
-            string msg;
+            string rawMsg;
             BigInteger hash;
 
             if (signingFile)
@@ -174,31 +361,75 @@ namespace Elgamal_Signature_CS
                 using var sha = SHA256.Create();
                 byte[] raw = sha.ComputeHash(_signFileBytes!);
                 hash = new BigInteger(raw, isUnsigned: true, isBigEndian: false);
-                msg = $"[FILE:{Path.GetFileName(_signFileName)}]";
+                rawMsg = $"[FILE:{Path.GetFileName(_signFileName)}]";
                 txtSignHash.Text = hash.ToString();
             }
             else
             {
-                msg = txtMsgSign.Text.Trim();
-                if (string.IsNullOrEmpty(msg)) { ShowWarning("Yêu cầu thông tin: Vui lòng nhập nội dung thông điệp chuỗi hoặc giá trị số nguyên M!"); return; }
+                rawMsg = txtMsgSign.Text;
+                string trimmedMsg = rawMsg.Trim();
 
-                if (BigInteger.TryParse(msg, out BigInteger parsedNum))
+                if (string.IsNullOrEmpty(trimmedMsg))
                 {
+                    ShowWarning("Yêu cầu thông tin: Vui lòng nhập nội dung thông điệp hoặc tải tệp tin (ảnh/PDF) trước khi thực hiện ký số!");
+                    return;
+                }
+
+                if (BigInteger.TryParse(trimmedMsg, out BigInteger parsedNum))
+                {
+                    if (parsedNum < 0)
+                    {
+                        ShowError("Lỗi giá trị M", "Thông điệp M phải là số nguyên không âm.");
+                        return;
+                    }
+
                     if (parsedNum >= _key.Q)
                     {
-                        hash = ElGamalCrypto.HashToBigInteger(msg);
+                        hash = ElGamalCrypto.HashToBigInteger(rawMsg);
                         SetStatus("Hệ thống phát hiện M >= q, kích hoạt cơ chế băm mật mã SHA-256 tự động.");
                     }
                     else
                     {
-                        hash = parsedNum; // Bài tập toán số học nhỏ
+                        hash = parsedNum;
                     }
                 }
                 else
                 {
-                    hash = ElGamalCrypto.HashToBigInteger(msg); // Chuỗi chữ thông thường
+                    hash = ElGamalCrypto.HashToBigInteger(rawMsg);
                 }
                 txtSignHash.Text = hash.ToString();
+            }
+
+            string kStr = txtKInput.Text.Trim();
+            BigInteger? customK = null;
+
+            if (!string.IsNullOrEmpty(kStr))
+            {
+                if (!BigInteger.TryParse(kStr, out BigInteger parsedK))
+                {
+                    ShowError("Lỗi định dạng k", "Giá trị k phải là một số nguyên hợp lệ.");
+                    return;
+                }
+
+                BigInteger qMinus1 = _key.Q - 1;
+
+                if (parsedK <= 1)
+                {
+                    ShowError("Lỗi giá trị k", $"Giá trị k = {parsedK} quá nhỏ.\nĐiều kiện bắt buộc: k > 1.");
+                    return;
+                }
+                if (parsedK >= qMinus1)
+                {
+                    ShowError("Lỗi giá trị k", $"Giá trị k = {parsedK} vượt giới hạn.\nĐiều kiện bắt buộc: k < q-1 = {qMinus1}.");
+                    return;
+                }
+                if (ElGamalCrypto.GCD(parsedK, qMinus1) != 1)
+                {
+                    ShowError("Lỗi giá trị k", $"Giá trị k = {parsedK} không nguyên tố cùng nhau với (q-1) = {qMinus1}.\nGCD(k, q-1) phải bằng 1.");
+                    return;
+                }
+
+                customK = parsedK;
             }
 
             btnSign.IsEnabled = false;
@@ -206,19 +437,23 @@ namespace Elgamal_Signature_CS
 
             try
             {
-                string kStr = txtKInput.Text.Trim();
-                if (!string.IsNullOrEmpty(kStr) && BigInteger.TryParse(kStr, out BigInteger customK))
+                if (customK.HasValue)
                 {
+                    BigInteger k = customK.Value;
                     BigInteger qMinus1 = _key.Q - 1;
-                    if (customK <= 1 || customK >= qMinus1 || ElGamalCrypto.GCD(customK, qMinus1) != 1)
-                    { ShowError("Lỗi logic tham số k", "Giá trị số ngẫu nhiên k buộc phải thỏa mãn: (1 < k < q-1) và nguyên tố cùng nhau với (q-1)!"); return; }
-
-                    BigInteger r = BigInteger.ModPow(_key.A, customK, _key.Q);
-                    BigInteger kInv = ElGamalCrypto.ModInverse(customK, qMinus1);
+                    BigInteger r = BigInteger.ModPow(_key.A, k, _key.Q);
+                    BigInteger kInv = ElGamalCrypto.ModInverse(k, qMinus1);
                     BigInteger xar = (_key.XA * r) % qMinus1;
                     BigInteger diff = (hash - xar) % qMinus1;
                     if (diff < 0) diff += qMinus1;
                     BigInteger s = (kInv * diff) % qMinus1;
+
+                    if (s == 0)
+                    {
+                        ShowError("Lỗi ký số", $"Giá trị k = {k} tạo ra s = 0, chữ ký không hợp lệ.\nVui lòng chọn một giá trị k khác.");
+                        return;
+                    }
+
                     _currentSignature = new ElGamalSig { R = r, S = s };
                 }
                 else
@@ -226,15 +461,17 @@ namespace Elgamal_Signature_CS
                     _currentSignature = await Task.Run(() => ElGamalCrypto.SignHash(hash, _key!));
                 }
 
-                _currentSignedMessage = msg;
+                _currentSignedMessage = rawMsg;
+                signingHashCache = hash;
+                _originalHash = hash;
+
                 txtSignR.Text = _currentSignature.R.ToString();
                 txtSignS.Text = _currentSignature.S.ToString();
 
-                string rHex = _currentSignature.R.ToString("X");
-                string sHex = _currentSignature.S.ToString("X");
-                string rPreview = rHex.Length > 16 ? rHex[..16] : rHex;
-                string sPreview = sHex.Length > 16 ? sHex[..16] : sHex;
-                txtSignatureBlock.Text = $"SIG_BLOCK[r={rPreview}…|s={sPreview}…]";
+                // Cập nhật xuất ra chuỗi Token Base64 đẹp mắt
+                string rBase64 = Convert.ToBase64String(_currentSignature.R.ToByteArray());
+                string sBase64 = Convert.ToBase64String(_currentSignature.S.ToByteArray());
+                txtSignatureBlock.Text = $"{rBase64}.{sBase64}";
 
                 btnSaveSignature.IsEnabled = true;
                 btnTransferToVerify.IsEnabled = true;
@@ -251,15 +488,16 @@ namespace Elgamal_Signature_CS
 
             txtVerifyR.Text = txtSignR.Text;
             txtVerifyS.Text = txtSignS.Text;
-            txtMsgVerify.Text = _currentSignedMessage.StartsWith("[FILE:") ? string.Empty : _currentSignedMessage;
+
+            bool isFileSign = _currentSignedMessage.StartsWith("[FILE:");
+            txtMsgVerify.Text = isFileSign ? string.Empty : _currentSignedMessage;
 
             _loadedQ = _key.Q;
             _loadedA = _key.A;
             _loadedYA = _key.YA;
-
-            // ĐỒNG BỘ ĐỂ ĐỐI CHIẾU LỖI TOÀN VẸN
             _fileOriginalYA = _key.YA;
-            _fileOriginalMessage = _currentSignedMessage;
+            _originalHash = signingHashCache;
+            _hasTransferredContext = true;
 
             if (_signFileBytes != null)
             {
@@ -267,10 +505,19 @@ namespace Elgamal_Signature_CS
                 _verifyFileName = _signFileName;
                 ShowVerifyFilePreview();
             }
+            else
+            {
+                _verifyFileBytes = null;
+                _verifyFileName = null;
+                borderFilePreviewVerify.Visibility = Visibility.Collapsed;
+                txtFileHashVerify.Visibility = Visibility.Collapsed;
+            }
 
-            tabMain.SelectedIndex = 2; // Chuyển luồng sang Tab Xác thực công khai
+            tabMain.SelectedIndex = 2;
             SetStatus("Dữ liệu phiên làm việc đã được ánh xạ sang Tab Xác Thực.");
         }
+
+        private BigInteger signingHashCache;
 
         private void BtnSaveSignature_Click(object sender, RoutedEventArgs e)
         {
@@ -280,9 +527,8 @@ namespace Elgamal_Signature_CS
             {
                 try
                 {
-                    // Đóng gói cấu trúc tệp ký bao gồm: r, s, Y_A và nội dung bản rõ gốc phục vụ đối chứng lỗi
                     File.WriteAllText(dlg.FileName,
-                        $"{_currentSignature.R}\n{_currentSignature.S}\n{_key.YA}\n{_currentSignedMessage}");
+                        $"{_currentSignature.R}\n{_currentSignature.S}\n{_key.YA}\n{_key.Q}\n{_key.A}\n{_currentSignedMessage}");
                     SetStatus($"Đã lưu tệp chữ ký mã hóa: {Path.GetFileName(dlg.FileName)}");
                     MessageBox.Show("💾 Lưu tệp chứng thư chữ ký số (.sig) thành công!", "Thành công");
                 }
@@ -290,7 +536,7 @@ namespace Elgamal_Signature_CS
             }
         }
 
-        // ==================== TAB 3: XÁC THỰC CHỮ KÝ (QUẢN LÝ BẮT LỖI) ====================
+        // ==================== TAB 3: XÁC THỰC CHỮ KÝ ====================
 
         private void BtnLoadImageVerify_Click(object sender, RoutedEventArgs e)
         {
@@ -322,8 +568,9 @@ namespace Elgamal_Signature_CS
                 _verifyFileBytes = bytes;
                 _verifyFileName = filePath;
 
+                _hasTransferredContext = false;
+                _originalHash = null;
                 txtMsgVerify.Text = string.Empty;
-                _fileOriginalMessage = $"[FILE:{Path.GetFileName(filePath)}]";
 
                 string fileName = Path.GetFileName(filePath);
                 long fileSize = bytes.Length;
@@ -379,10 +626,15 @@ namespace Elgamal_Signature_CS
                         BigInteger.TryParse(lines[2], out BigInteger ya))
                     {
                         _loadedQ = q; _loadedA = a; _loadedYA = ya;
+                        _hasTransferredContext = false;
+                        _originalHash = null;
                         SetStatus($"Đã tích hợp chứng thư khóa công khai: {Path.GetFileName(dlg.FileName)}");
                         MessageBox.Show("✅ Nạp tệp khóa công khai thành công!", "Thành công");
                     }
-                    else { ShowError("Lỗi cấu trúc khóa", "Định dạng tệp tin khóa .pub bị hư hại hoặc không đúng tiêu chuẩn mã hóa."); }
+                    else
+                    {
+                        ShowError("Lỗi cấu trúc khóa", "Định dạng tệp tin khóa .pub bị hư hại hoặc không đúng tiêu chuẩn.");
+                    }
                 }
                 catch (Exception ex) { ShowError("Lỗi hệ thống", ex.Message); }
             }
@@ -396,23 +648,46 @@ namespace Elgamal_Signature_CS
                 try
                 {
                     string[] lines = File.ReadAllLines(dlg.FileName);
-                    if (lines.Length >= 4 &&
+                    if (lines.Length >= 6 &&
                         BigInteger.TryParse(lines[0], out BigInteger r) &&
                         BigInteger.TryParse(lines[1], out BigInteger s) &&
-                        BigInteger.TryParse(lines[2], out BigInteger origYA))
+                        BigInteger.TryParse(lines[2], out BigInteger origYA) &&
+                        BigInteger.TryParse(lines[3], out BigInteger q) &&
+                        BigInteger.TryParse(lines[4], out BigInteger a))
                     {
                         txtVerifyR.Text = r.ToString();
                         txtVerifyS.Text = s.ToString();
 
-                        // ĐÓNG GÓI DỮ LIỆU GỐC TỪ FILE ĐỂ THỰC HIỆN ĐỐI CHIẾU
+                        _loadedQ = q;
+                        _loadedA = a;
+                        _loadedYA = origYA;
                         _fileOriginalYA = origYA;
-                        _fileOriginalMessage = string.Join(Environment.NewLine, lines, 3, lines.Length - 3).Trim();
-                        txtMsgVerify.Text = _fileOriginalMessage.StartsWith("[FILE:") ? string.Empty : _fileOriginalMessage;
+
+                        string rawStoredMsg = string.Join(Environment.NewLine, lines, 5, lines.Length - 5);
+                        bool isFileMsg = rawStoredMsg.TrimStart().StartsWith("[FILE:");
+                        txtMsgVerify.Text = isFileMsg ? string.Empty : rawStoredMsg;
+
+                        if (!isFileMsg)
+                        {
+                            if (BigInteger.TryParse(rawStoredMsg.Trim(), out BigInteger parsedNum) && parsedNum < q)
+                                _originalHash = parsedNum;
+                            else
+                                _originalHash = ElGamalCrypto.HashToBigInteger(rawStoredMsg);
+                        }
+                        else
+                        {
+                            _originalHash = null;
+                        }
+
+                        _hasTransferredContext = false;
 
                         SetStatus($"Đã nạp tệp văn bản ký: {Path.GetFileName(dlg.FileName)}");
-                        MessageBox.Show("✅ Nạp tệp cấu trúc chữ ký thành công!\nDữ liệu gốc đã được lưu vết tự động để phân tích lỗi toàn vẹn.", "Thành công");
+                        MessageBox.Show("✅ Nạp tệp cấu trúc chữ ký thành công!\nCác tham số q, a và Y_A tự động đồng bộ hóa.", "Thành công");
                     }
-                    else { ShowError("Lỗi cấu trúc dữ liệu", "Tệp tin chữ ký .sig không tuân thủ định dạng kết xuất mật mã hệ thống."); }
+                    else
+                    {
+                        ShowError("Lỗi cấu trúc dữ liệu", "Tệp tin chữ ký .sig không tuân thủ cấu trúc đồng bộ mật mã.");
+                    }
                 }
                 catch (Exception ex) { ShowError("Lỗi luồng vào", ex.Message); }
             }
@@ -423,112 +698,158 @@ namespace Elgamal_Signature_CS
             string rStr = txtVerifyR.Text.Trim();
             string sStr = txtVerifyS.Text.Trim();
 
-            if (string.IsNullOrEmpty(rStr) || string.IsNullOrEmpty(sStr))
-            { ShowWarning("Yêu cầu toán học: Vui lòng nhập giá trị hai thành phần ký số (r) và (s)!"); return; }
-
             if (_loadedQ == null || _loadedA == null || _loadedYA == null)
-            { ShowWarning("Yêu cầu hệ thống: Vui lòng nạp chứng thư khóa công khai (.pub) trước khi thực hiện hành động này!"); return; }
+            {
+                ShowWarning("Thiếu thông tin khóa công khai!\n\nVui lòng thực hiện một trong hai cách:\n• Nạp tệp chứng thư khóa công khai (.pub)\n• Nạp tệp chữ ký (.sig) có chứa thông tin khóa\n• Hoặc điều hướng từ Tab Ký Số sang Tab này");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(rStr) || string.IsNullOrEmpty(sStr))
+            {
+                ShowWarning("Vui lòng nhập đầy đủ cả hai thành phần chữ ký:\n• Thành phần r\n• Thành phần s");
+                return;
+            }
+
+            if (!BigInteger.TryParse(rStr, out BigInteger r))
+            {
+                ShowError("Lỗi định dạng r", $"Giá trị r = \"{rStr}\" không phải là số nguyên hợp lệ.");
+                return;
+            }
+            if (!BigInteger.TryParse(sStr, out BigInteger s))
+            {
+                ShowError("Lỗi định dạng s", $"Giá trị s = \"{sStr}\" không phải là số nguyên hợp lệ.");
+                return;
+            }
+
+            BigInteger q = _loadedQ.Value;
+            BigInteger qMinus1 = q - 1;
+
+            if (r <= 0 || r >= q)
+            {
+                ShowError("Lỗi phạm vi r", $"Giá trị r = {r} vi phạm điều kiện: 0 < r < q.\nGiới hạn: q = {q}");
+                return;
+            }
+            if (s <= 0 || s >= qMinus1)
+            {
+                ShowError("Lỗi phạm vi s", $"Giá trị s = {s} vi phạm điều kiện: 0 < s < q-1.\nGiới hạn: q-1 = {qMinus1}");
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(txtMsgVerify.Text.Trim()) && _verifyFileBytes != null)
+            {
+                _verifyFileBytes = null;
+                _verifyFileName = null;
+                borderFilePreviewVerify.Visibility = Visibility.Collapsed;
+                txtFileHashVerify.Visibility = Visibility.Collapsed;
+            }
 
             bool verifyingFile = _verifyFileBytes != null;
             BigInteger hash;
-            string msgInput;
 
             if (verifyingFile)
             {
-                msgInput = $"[FILE:{Path.GetFileName(_verifyFileName)}]";
                 using var sha = SHA256.Create();
                 byte[] raw = sha.ComputeHash(_verifyFileBytes!);
                 hash = new BigInteger(raw, isUnsigned: true, isBigEndian: false);
             }
             else
             {
-                msgInput = txtMsgVerify.Text.Trim();
-                if (string.IsNullOrEmpty(msgInput)) { ShowWarning("Hành động bị hủy: Hãy nhập thông điệp chuỗi/số hoặc tải tệp tin cần đối soát!"); return; }
+                string rawVerifyMsg = txtMsgVerify.Text;
 
-                if (BigInteger.TryParse(msgInput, out BigInteger parsedNum) && parsedNum < _loadedQ.Value)
+                if (string.IsNullOrEmpty(rawVerifyMsg))
                 {
+                    ShowWarning("Thiếu dữ liệu xác thực!\nVui lòng nhập thông điệp hoặc tải tệp tin cần kiểm tra.");
+                    return;
+                }
+
+                string trimmedVerifyMsg = rawVerifyMsg.Trim();
+
+                if (BigInteger.TryParse(trimmedVerifyMsg, out BigInteger parsedNum) && parsedNum < q)
                     hash = parsedNum;
-                }
                 else
-                {
-                    hash = ElGamalCrypto.HashToBigInteger(msgInput);
-                }
+                    hash = ElGamalCrypto.HashToBigInteger(rawVerifyMsg);
             }
 
             btnVerify.IsEnabled = false;
             SetResult("⏳", "— ĐANG TIẾN HÀNH XỬ LÝ TOÁN HỌC ĐỐI CHIẾU —", "#4A6070", "#08111A", "#1A3040");
-            SetStatus("Đang chạy giải thuật kiểm chứng vế phương trình...");
 
             try
             {
-                BigInteger r = BigInteger.Parse(rStr);
-                BigInteger s = BigInteger.Parse(sStr);
                 var sig = new ElGamalSig { R = r, S = s };
-                var keyCtx = new ElGamalKeyPair { Q = _loadedQ.Value, A = _loadedA.Value, YA = _loadedYA.Value };
 
-                var result = await Task.Run(() => ElGamalCrypto.VerifyWithHash(hash, sig, keyCtx));
+                var keyCtxCurrent = new ElGamalKeyPair { Q = q, A = _loadedA.Value, YA = _loadedYA.Value };
+                var resultCurrent = await Task.Run(() => ElGamalCrypto.VerifyWithHash(hash, sig, keyCtxCurrent));
 
                 txtVHash.Text = "M = " + hash.ToString();
-                txtVLHS.Text = "V₁ = " + result.lhs.ToString();
-                txtVRHS.Text = "V₂ = " + result.rhs.ToString();
+                txtVLHS.Text = "V₁ = " + resultCurrent.lhs.ToString();
+                txtVRHS.Text = "V₂ = " + resultCurrent.rhs.ToString();
 
-                // ==================== MÔ-ĐUN PHÂN TÍCH VÀ KIỂM SOÁT BẮT LỖI CHÍNH XÁC ====================
+                bool mathValidWithCurrentInputs = resultCurrent.valid;
 
-                // 1. Kiểm tra sự thay đổi của nội dung thông điệp
-                bool isMessageModified = !string.IsNullOrEmpty(_fileOriginalMessage) && msgInput != _fileOriginalMessage;
-
-                // 2. Kiểm tra sự sai lệch của cặp khóa mật mã dùng để verify
-                bool isKeyIncorrect = _fileOriginalYA != null && _loadedYA.Value != _fileOriginalYA.Value;
-
-                // 3. Kết quả xác thực toán học ElGamal cơ bản
-                bool isMathValid = result.valid;
-
-                if (isMathValid && !isMessageModified && !isKeyIncorrect)
+                if (mathValidWithCurrentInputs)
                 {
-                    // KHỚP HOÀN TOÀN: TOÀN VẸN TUYỆT ĐỐI
-                    SetResult("✅", "CHỮ KÝ HỢP LỆ\nThông điệp toàn vẹn, nguồn gốc thực thể được xác thực thành công!", "#00FF87", "#00140A", "#00FF87");
-                    SetStatus("Xác thực chứng thư: HỢP LỆ ✅");
+                    if (_fileOriginalYA != null && _loadedYA.Value != _fileOriginalYA.Value)
+                    {
+                        SetResult("⚠️", "LỖI: Khóa bị sửa đổi hoặc sai!\n(Chữ ký khớp với khóa hiện tại nhưng khóa này đã bị tráo so với gốc)", "#FF9F43", "#1A0A00", "#FF9F43");
+                    }
+                    else
+                    {
+                        SetResult("✅", "✅ CHỮ KÝ SỐ HỢP LỆ\n\nVăn bản toàn vẹn và nguồn gốc khóa chính xác.", "#00FF87", "#00140A", "#00FF87");
+                    }
                 }
                 else
                 {
-                    // PHÂN TÍCH CHÍNH XÁC NGUYÊN NHÂN LỖI THEO 3 TRƯỜNG HỢP YÊU CẦU
-                    string errorHeader = "❌ CHỮ KÝ KHÔNG HỢP LỆ ❌\n";
-                    string errorDetail = string.Empty;
+                    bool msgChanged = false;
+                    bool keyChanged = false;
 
-                    // TRƯỜNG HỢP SAI CẢ HAI: Thông điệp bị can thiệp ĐỒNG THỜI toán học chữ ký hoặc khóa bị hỏng
-                    if (isMessageModified && (!isMathValid || isKeyIncorrect))
+                    if (_fileOriginalYA.HasValue && _loadedYA.Value != _fileOriginalYA.Value)
                     {
-                        errorDetail = "VI PHẠM HỆ THỐNG PHÁT HIỆN LỖI KÉP:\n1. Nội dung thông điệp văn bản (M) đã bị thay đổi, chỉnh sửa so với bản gốc.\n2. Cấu trúc chữ ký số (r, s) hoặc Khóa công khai nạp vào không trùng khớp.";
+                        keyChanged = true;
                     }
-                    // TRƯỜNG HỢP 1 SAI THÔNG ĐIỆP: Chữ ký toán học đúng thực thể nhưng thông điệp truyền tải hiện tại bị sửa đổi
-                    else if (isMessageModified)
+
+                    if (_originalHash.HasValue)
                     {
-                        errorDetail = "VI PHẠM TÍNH TOÀN VẸN DỮ LIỆU:\nChữ ký mã hóa toán học là chính xác của thực thể gửi, nhưng nội dung thông điệp (M) hiện tại đã bị sửa đổi hoặc chèn mã giả mạo!";
+                        if (hash != _originalHash.Value) msgChanged = true;
                     }
-                    // TRƯỜNG HỢP 2 SAI CHỮ KÝ/KHÓA: Thông điệp giữ nguyên bản gốc nhưng chữ ký số hoặc khóa nạp vào bị sai lệch
+                    else if (_fileOriginalYA.HasValue)
+                    {
+                        var keyCtxOrig = new ElGamalKeyPair { Q = q, A = _loadedA.Value, YA = _fileOriginalYA.Value };
+                        var resultOrig = await Task.Run(() => ElGamalCrypto.VerifyWithHash(hash, sig, keyCtxOrig));
+                        if (!resultOrig.valid) msgChanged = true;
+                    }
                     else
                     {
-                        if (isKeyIncorrect)
-                        {
-                            errorDetail = "VI PHẠM NGUỒN GỐC CHỨNG THƯ:\nNội dung thông điệp chính xác, nhưng Khóa công khai (.pub) dùng để verify không phải là khóa đã dùng để ký tệp tin này.";
-                        }
-                        else
-                        {
-                            errorDetail = "VI PHẠM XÁC THỰC TOÁN HỌC:\nThông điệp toàn vẹn nhưng cặp chữ ký điện tử (r, s) truyền vào bị sai lệch giá trị, không thỏa mãn phương trình đồng dư V₁ ≡ V₂ mod q.";
-                        }
+                        msgChanged = true;
                     }
 
-                    // Xuất cảnh báo tương phản cao lên giao diện bảng màu đỏ rực đặc trưng
-                    SetResult("❌", errorHeader + errorDetail, "#FF4D4D", "#1A0505", "#FF4D4D");
-                    SetStatus("Xác thực chứng thư: THẤT BẠI ❌");
+                    // Đã áp dụng lỗi gom nhóm theo chữ HOẶC
+                    if (msgChanged && keyChanged)
+                    {
+                        SetResult("❌", "LỖI: Cả văn bản không toàn vẹn hoặc khóa bị thay đổi!", "#FF4D4D", "#1A0505", "#FF4D4D");
+                    }
+                    else if (msgChanged && !keyChanged)
+                    {
+                        SetResult("❌", "LỖI: Văn bản không toàn vẹn hoặc đã bị sửa đổi!", "#FF4D4D", "#1A0505", "#FF4D4D");
+                    }
+                    else if (!msgChanged && keyChanged)
+                    {
+                        SetResult("❌", "LỖI: Khóa bị sửa đổi hoặc sai!", "#FF4D4D", "#1A0505", "#FF4D4D");
+                    }
+                    else
+                    {
+                        SetResult("❌", "LỖI: Khóa bị sửa đổi hoặc sai!", "#FF4D4D", "#1A0505", "#FF4D4D");
+                    }
                 }
             }
             catch (Exception ex)
             {
-                ShowError("Lỗi thực thi toán học", ex.Message);
-                SetResult("❌", "LỖI HỆ THỐNG MẬT MÃ:\nDữ liệu chuỗi số học nhập vào vượt quá giới hạn Modulus hoặc không đúng định dạng.", "#FF4D4D", "#1A0505", "#FF4D4D");
+                ShowError("Lỗi toán học", ex.Message);
+                SetResult("❌", "❌ Lỗi trong quá trình xác thực\n\n" + ex.Message, "#FF4D4D", "#1A0505", "#FF4D4D");
             }
-            finally { btnVerify.IsEnabled = true; }
+            finally
+            {
+                btnVerify.IsEnabled = true;
+            }
         }
 
         // ==================== CÁC PHƯƠNG THỨC TRỢ NĂNG (HELPERS) ====================
@@ -557,10 +878,7 @@ namespace Elgamal_Signature_CS
             borderResult.BorderBrush = BrushOf(border);
         }
 
-        private void SetStatus(string msg)
-        {
-            txtStatusBar.Text = msg;
-        }
+        private void SetStatus(string msg) => txtStatusBar.Text = msg;
 
         private static SolidColorBrush BrushOf(string hex)
         {

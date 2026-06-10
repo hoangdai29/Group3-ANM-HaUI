@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7CE26F73-0D58-B1F7-C801-2350173FC045}|Elgamal_Signature_CS.csproj|d:\\group3-anm-haui\\elgamal_signature_cs\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7CE26F73-0D58-B1F7-C801-2350173FC045}|Elgamal_Signature_CS.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{7CE26F73-0D58-B1F7-C801-2350173FC045}|Elgamal_Signature_CS.csproj|d:\\group3-anm-haui\\elgamal_signature_cs\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{7CE26F73-0D58-B1F7-C801-2350173FC045}|Elgamal_Signature_CS.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7CE26F73-0D58-B1F7-C801-2350173FC045}|Elgamal_Signature_CS.csproj|d:\\group3-anm-haui\\elgamal_signature_cs\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7CE26F73-0D58-B1F7-C801-2350173FC045}|Elgamal_Signature_CS.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7CE26F73-0D58-B1F7-C801-2350173FC045}|Elgamal_Signature_CS.csproj|d:\\group3-anm-haui\\elgamal_signature_cs\\elgamalcrypto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -30,18 +30,18 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\MainWindow.xaml",
               "RelativeDocumentMoniker": "MainWindow.xaml",
               "ToolTip": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\MainWindow.xaml",
               "RelativeToolTip": "MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-31T14:33:16.093Z",
+              "WhenOpened": "2026-06-10T01:55:26.167Z",
               "EditorCaption": ""
             },
             {
@@ -52,10 +52,9 @@
               "RelativeDocumentMoniker": "Elgamalcrypto.cs",
               "ToolTip": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\Elgamalcrypto.cs",
               "RelativeToolTip": "Elgamalcrypto.cs",
-              "ViewState": "AgIAANcAAAAAAAAAAAAmwOkAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAMsAAAAAAAAAAAAUwOkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-26T10:33:45.01Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-26T10:33:45.01Z"
             },
             {
               "$type": "Document",
@@ -83,13 +82,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "MainWindow.xaml.cs",
               "ToolTip": "D:\\Group3-ANM-HaUI\\Elgamal_Signature_CS\\MainWindow.xaml.cs",
               "RelativeToolTip": "MainWindow.xaml.cs",
-              "ViewState": "AgIAACACAAAAAAAAAAAiwEACAAABAAAAAAAAAA==",
+              "ViewState": "AgIAADgDAAAAAAAAAAAcwEcDAABoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-05-26T10:11:20.37Z",
               "EditorCaption": ""
