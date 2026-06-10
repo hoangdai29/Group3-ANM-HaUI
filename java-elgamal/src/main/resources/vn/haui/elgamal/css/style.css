@@ -1,16 +1,12 @@
-/* --- Hệ Thống Phong Cách Thiết Kế Giao Diện Sáng Thực Dụng --- */
-
 .root-pane {
-    -fx-background-color: #f3f4f6; /* Nền xám nhạt dịu mắt */
+    -fx-background-color: #f3f4f6;
 }
 
-/* Banner tiêu đề trên cùng */
 .header-banner {
-    -fx-background-color: linear-gradient(to right, #312e81, #4338ca); /* Tông xanh Indigo/Deep Blue */
+    -fx-background-color: linear-gradient(to right, #312e81, #4338ca);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 5, 0, 0, 2);
 }
 
-/* Thẻ Card chứa mỗi Bước */
 .step-card {
     -fx-background-color: #ffffff;
     -fx-background-radius: 8px;
@@ -20,61 +16,71 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 3);
 }
 
-/* Định nghĩa Header của mỗi Thẻ */
 .card-header {
-    -fx-background-radius: 7px 7px 0px 0px;
-    -fx-border-radius: 7px 7px 0px 0px;
-    -fx-border-width: 0px 0px 2px 0px;
+    -fx-background-radius: 7px 7px 0 0;
+    -fx-border-radius: 7px 7px 0 0;
+    -fx-border-width: 0 0 2px 0;
 }
 
 .keygen-header {
-    -fx-background-color: #e0e7ff; /* Tím nhạt */
+    -fx-background-color: #e0e7ff;
     -fx-border-color: #818cf8;
 }
 
 .sign-header {
-    -fx-background-color: #dbeafe; /* Xanh dương nhạt */
+    -fx-background-color: #dbeafe;
     -fx-border-color: #60a5fa;
 }
 
 .verify-header {
-    -fx-background-color: #d1fae5; /* Xanh lá cây nhạt */
+    -fx-background-color: #d1fae5;
     -fx-border-color: #34d399;
 }
 
-/* Phong cách trường nhập liệu và hiển thị */
-.text-field, .text-area {
+.text-field,
+.text-area,
+.combo-box {
     -fx-background-color: #ffffff;
     -fx-border-color: #d1d5db;
     -fx-border-radius: 4px;
     -fx-background-radius: 4px;
     -fx-text-fill: #1f2937;
-    -fx-font-family: "Courier New", monospace; /* Thể hiện tính chất dữ liệu mã hóa */
     -fx-font-size: 13px;
 }
 
-.text-field:focused, .text-area:focused {
-    -fx-border-color: #6366f1;
-    -fx-effect: dropshadow(three-pass-box, rgba(99, 102, 241, 0.2), 3, 0, 0, 0);
-}
-
 .text-area {
-    -fx-pref-row-count: 3;
+    -fx-font-family: "Courier New", monospace;
 }
 
-/* Các Nhãn thông tin cảnh báo */
+.text-field:focused,
+.text-area:focused,
+.combo-box:focused {
+    -fx-border-color: #6366f1;
+    -fx-effect: dropshadow(three-pass-box, rgba(99,102,241,0.2), 3, 0, 0, 0);
+}
+
+.label {
+    -fx-wrap-text: true;
+}
+
+.key-label {
+    -fx-min-width: 78px;
+    -fx-max-width: 78px;
+    -fx-alignment: TOP_LEFT;
+    -fx-wrap-text: true;
+}
+
 .lbl-error {
-    -fx-text-fill: #dc2626; /* Màu đỏ rõ nét */
+    -fx-text-fill: #dc2626;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
 }
 
 .lbl-info {
-    -fx-text-fill: #4b5563; /* Xám đen vừa phải */
+    -fx-text-fill: #4b5563;
     -fx-font-size: 11px;
 }
 
-/* Nút bấm (Buttons) */
 .btn {
     -fx-background-radius: 4px;
     -fx-border-radius: 4px;
@@ -87,34 +93,37 @@
 }
 
 .btn-primary {
-    -fx-background-color: #4f46e5; /* Tím */
+    -fx-background-color: #4f46e5;
 }
+
 .btn-primary:hover {
     -fx-background-color: #4338ca;
 }
 
 .btn-secondary {
-    -fx-background-color: #4b5563; /* Xám */
+    -fx-background-color: #4b5563;
 }
+
 .btn-secondary:hover {
     -fx-background-color: #374151;
 }
 
 .btn-info {
-    -fx-background-color: #2563eb; /* Xanh dương */
+    -fx-background-color: #2563eb;
 }
+
 .btn-info:hover {
     -fx-background-color: #1d4ed8;
 }
 
 .btn-success {
-    -fx-background-color: #059669; /* Xanh lá */
+    -fx-background-color: #059669;
 }
+
 .btn-success:hover {
     -fx-background-color: #047857;
 }
 
-/* Nút phụ như Copy / Tải */
 .btn-copy {
     -fx-background-color: #f3f4f6;
     -fx-text-fill: #374151;
@@ -125,11 +134,11 @@
     -fx-cursor: hand;
     -fx-padding: 4px 8px;
 }
+
 .btn-copy:hover {
     -fx-background-color: #e5e7eb;
 }
 
-/* Hộp trạng thái kết quả xác minh */
 .result-card-default {
     -fx-background-color: #f3f4f6;
     -fx-border-color: #d1d5db;
@@ -139,24 +148,21 @@
 }
 
 .result-card-valid {
-    -fx-background-color: #ecfdf5; /* Xanh lục cực nhạt */
+    -fx-background-color: #ecfdf5;
     -fx-border-color: #10b981;
     -fx-border-width: 1.5px;
     -fx-border-radius: 6px;
     -fx-background-radius: 6px;
-    -fx-text-fill: #065f46;
 }
 
 .result-card-invalid {
-    -fx-background-color: #fef2f2; /* Đỏ nhạt */
+    -fx-background-color: #fef2f2;
     -fx-border-color: #ef4444;
     -fx-border-width: 1.5px;
     -fx-border-radius: 6px;
     -fx-background-radius: 6px;
-    -fx-text-fill: #991b1b;
 }
 
-/* Khu vực log lịch sử ở dưới */
 .log-list-view {
     -fx-background-color: #ffffff;
     -fx-border-color: #d1d5db;
@@ -170,7 +176,18 @@
     -fx-text-fill: #374151;
     -fx-padding: 3px 6px;
 }
+
 .log-list-view .list-cell:filled:selected {
     -fx-background-color: #e0e7ff;
     -fx-text-fill: #312e81;
+}
+
+.step-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.step-scroll-pane > .viewport {
+    -fx-background-color: transparent;
 }

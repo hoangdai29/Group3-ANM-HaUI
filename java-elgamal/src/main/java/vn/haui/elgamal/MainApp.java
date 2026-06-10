@@ -14,6 +14,10 @@ import java.io.IOException;
  */
 public class MainApp extends Application {
 
+    /**
+     * Khởi tạo và hiển thị cửa sổ chính của ứng dụng.
+     * @param primaryStage Stage chính do JavaFX runtime cung cấp
+     */
     @Override
     public void start(Stage primaryStage) {
         try {
@@ -39,8 +43,14 @@ public class MainApp extends Application {
             primaryStage.setMinHeight(600); // Chiều cao tối thiểu hợp lý
             primaryStage.show();
         } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Gặp lỗi trong quá trình tải giao diện MainView.fxml: " + e.getMessage());
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.ERROR
+            );
+            alert.setTitle("Lỗi Khởi Động");
+            alert.setHeaderText("Không thể tải giao diện chính");
+            alert.setContentText("Chi tiết lỗi: " + e.getMessage() + "\nVui lòng kiểm tra lại tệp MainView.fxml và style.css.");
+            alert.showAndWait();
+            javafx.application.Platform.exit();
         }
     }
 
