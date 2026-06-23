@@ -29,9 +29,13 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.nio.file.Files;
 
 public class MainController {
 
@@ -566,98 +570,187 @@ public class MainController {
 
     @FXML
     private void handleVerify() {
-        String sigStr = taVerifySignature.getText() == null ? "" : taVerifySignature.getText().trim();
-        String yStr = taVerifyPubY.getText() == null ? "" : taVerifyPubY.getText().trim();
+        List<VerificationError> errors = new ArrayList<>();
 
+        String sigStr   = taVerifySignature.getText() == null ? "" : taVerifySignature.getText().trim();
+        String yStr     = taVerifyPubY.getText()       == null ? "" : taVerifyPubY.getText().trim();
+        String pStr     = taKeyP.getText()             == null ? "" : taKeyP.getText().trim();
+        String alphaStr = taKeyAlpha.getText()         == null ? "" : taKeyAlpha.getText().trim();
+
+        // === Phase 1: Kiểm tra trống ===
         if (sigStr.isEmpty()) {
-            updateVerifyResultCard("DEFAULT", "❌ Vui lòng cung cấp chữ ký số.");
-            return;
+            errors.add(new VerificationError("❌ Vui lòng cung cấp chữ ký số.", "", "DEFAULT"));
         }
         if (yStr.isEmpty()) {
-            updateVerifyResultCard("DEFAULT", "❌ Vui lòng cung cấp khóa công khai y.");
-            return;
+            errors.add(new VerificationError("❌ Vui lòng cung cấp khóa công khai y.", "", "DEFAULT"));
         }
-        if (!requireSystemParamsForVerify()) {
+        if (pStr.isEmpty() || alphaStr.isEmpty()) {
+            errors.add(new VerificationError("❌ Thiếu thông tin hệ thống p và alpha ở Bước 1.", "", "DEFAULT"));
+        }
+        if (!errors.isEmpty()) {
+            displayVerificationErrors(errors);
+            addLog("LỖI XÁC MINH", "Thiếu dữ liệu đầu vào.");
             return;
         }
 
+        // === KIỂM TRA SỚM: so sánh chuỗi trực tiếp trước khi parse ===
+        byte[] dataToVerify = null;
+        try { dataToVerify = getVerifyInputData(); } catch (Exception ignored) {}
+
+        boolean sigFormatBad = !sigStr.contains("|");
+        boolean sigChanged   = lastSignedSignature != null && !sigStr.equals(lastSignedSignature);
+        boolean dataChanged  = lastSignedData != null && dataToVerify != null
+                && !Arrays.equals(dataToVerify, lastSignedData);
+        boolean yChanged     = false;
+        try {
+            BigInteger yParsed = new BigInteger(yStr);
+            yChanged = currentKeyPair != null && !yParsed.equals(currentKeyPair.getY());
+        } catch (NumberFormatException ignored) {}
+
+        // Trường hợp: DỮ LIỆU + CHỮ KÝ sai, khóa y đúng
+        if ((sigFormatBad || sigChanged) && dataChanged && !yChanged) {
+            errors.add(new VerificationError("❌ Dữ liệu và chữ ký đã bị sửa đổi", "", "INVALID"));
+            displayVerificationErrors(errors);
+            addLog("XÁC MINH THẤT BẠI", "Dữ liệu và chữ ký đều bị sửa đổi.");
+            return;
+        }
+
+        // Trường hợp: DỮ LIỆU + KHÓA Y sai, chữ ký đúng
+        if (dataChanged && yChanged && !(sigFormatBad || sigChanged)) {
+            errors.add(new VerificationError("❌ Dữ liệu bị sửa đổi", "", "INVALID"));
+            errors.add(new VerificationError("❌ Sai khóa công khai y", "", "INVALID"));
+            displayVerificationErrors(errors);
+            addLog("XÁC MINH THẤT BẠI", "Dữ liệu bị sửa đổi và sai khóa công khai y.");
+            return;
+        }
+
+        // Trường hợp: CHỮ KÝ + KHÓA Y sai, dữ liệu đúng
+        if ((sigFormatBad || sigChanged) && yChanged && !dataChanged) {
+            errors.add(new VerificationError("❌ Chữ ký đã bị sửa đổi", "", "INVALID"));
+            errors.add(new VerificationError("❌ Sai khóa công khai y", "", "INVALID"));
+            displayVerificationErrors(errors);
+            addLog("XÁC MINH THẤT BẠI", "Chữ ký và khóa công khai y đều sai.");
+            return;
+        }
+
+        // Trường hợp: CẢ 3 cùng sai
+        if ((sigFormatBad || sigChanged) && dataChanged && yChanged) {
+            errors.add(new VerificationError("❌ Dữ liệu và chữ ký đã bị sửa đổi", "", "INVALID"));
+            errors.add(new VerificationError("❌ Sai khóa công khai y", "", "INVALID"));
+            displayVerificationErrors(errors);
+            addLog("XÁC MINH THẤT BẠI", "Dữ liệu, chữ ký và khóa công khai y đều sai.");
+            return;
+        }
+
+        // === Phase 2: Parse signature ===
         final SignatureData signature;
-        final BigInteger p;
-        final BigInteger alpha;
-        final BigInteger y;
-
         try {
             signature = ValidationService.parseSignature(sigStr);
         } catch (IllegalArgumentException e) {
-            updateVerifyResultCard("INVALID_FORMAT", "❌ Lỗi định dạng chữ ký\n" + e.getMessage());
-            addLog("LỖI XÁC MINH", "Chữ ký sai định dạng.");
+            errors.add(new VerificationError(
+                    "❌ Chữ ký đã bị sửa đổi",
+                    "Cấu trúc chữ ký không toàn vẹn hoặc đã bị can thiệp trên đường truyền.",
+                    "INVALID"
+            ));
+            displayVerificationErrors(errors);
+            addLog("XÁC MINH THẤT BẠI", "Chữ ký đã bị can thiệp/sửa đổi (Lỗi toàn vẹn cấu trúc).");
             return;
         }
 
+        // === Phase 3: Parse p, alpha, y ===
+        final BigInteger p;
+        final BigInteger alpha;
+        final BigInteger y;
         try {
-            p = new BigInteger(taKeyP.getText().trim());
-            alpha = new BigInteger(taKeyAlpha.getText().trim());
-            y = new BigInteger(yStr);
+            p     = new BigInteger(pStr);
+            alpha = new BigInteger(alphaStr);
+            y     = new BigInteger(yStr);
         } catch (NumberFormatException e) {
-            updateVerifyResultCard("DEFAULT", "❌ p, alpha, y phải là số nguyên hệ 10.");
+            errors.add(new VerificationError("❌ p, alpha, y phải là số nguyên hệ 10.", "", "DEFAULT"));
+            displayVerificationErrors(errors);
             return;
         }
 
-        BigInteger r = signature.getR();
-        BigInteger s = signature.getS();
+        // === Phase 4: Validate r, s, y ranges ===
+        BigInteger r   = signature.getR();
+        BigInteger s   = signature.getS();
         BigInteger pm1 = p.subtract(BigInteger.ONE);
+
         if (y.compareTo(BigInteger.ONE) <= 0 || y.compareTo(p) >= 0) {
-            updateVerifyResultCard("INVALID", "❌ Sai khóa công khai y\nGiá trị y không nằm trong khoảng hợp lệ.");
-            return;
+            errors.add(new VerificationError(
+                    "❌ Sai khóa công khai y",
+                    "Giá trị y không nằm trong khoảng hợp lệ.",
+                    "INVALID"
+            ));
         }
         if (r.compareTo(BigInteger.ZERO) <= 0 || r.compareTo(p) >= 0) {
-            updateVerifyResultCard("INVALID", "❌ Sai chữ ký số\nThành phần r không hợp lệ.");
-            return;
+            errors.add(new VerificationError(
+                    "❌ Sai chữ ký số",
+                    "Thành phần r không hợp lệ.",
+                    "INVALID"
+            ));
         }
         if (s.compareTo(BigInteger.ZERO) <= 0 || s.compareTo(pm1) >= 0) {
-            updateVerifyResultCard("INVALID", "❌ Sai chữ ký số\nThành phần s không hợp lệ.");
+            errors.add(new VerificationError(
+                    "❌ Sai chữ ký số",
+                    "Thành phần s không hợp lệ.",
+                    "INVALID"
+            ));
+        }
+        if (!errors.isEmpty()) {
+            displayVerificationErrors(errors);
             return;
         }
 
-        final byte[] dataToVerify;
-        final String sourceDescription;
-        try {
-            dataToVerify = getVerifyInputData();
-            sourceDescription = SOURCE_FILE.equals(cbVerifySourceType.getValue())
-                    ? "tệp tin [" + selectedVerifyFile.getName() + "]"
-                    : "văn bản trực tiếp";
-        } catch (Exception e) {
-            updateVerifyResultCard("DEFAULT", "❌ " + e.getMessage());
-            return;
+        // === Phase 5: Get input data (dùng lại nếu đã lấy được, lấy lại nếu chưa) ===
+        if (dataToVerify == null) {
+            try {
+                dataToVerify = getVerifyInputData();
+            } catch (Exception e) {
+                errors.add(new VerificationError("❌ " + e.getMessage(), "", "DEFAULT"));
+                displayVerificationErrors(errors);
+                return;
+            }
         }
+
+        final byte[] finalData       = dataToVerify;
+        final String finalDesc       = SOURCE_FILE.equals(cbVerifySourceType.getValue())
+                ? "tệp tin [" + selectedVerifyFile.getName() + "]"
+                : "văn bản trực tiếp";
+        final SignatureData finalSig = signature;
+        final BigInteger finalP      = p;
+        final BigInteger finalAlpha  = alpha;
+        final BigInteger finalY      = y;
+        final String finalSigStr     = sigStr;
 
         setBusy(btnVerify, progressVerify, true);
-        addLog("XÁC MINH", "Đang xác thực chữ ký cho " + sourceDescription + "...");
+        addLog("XÁC MINH", "Đang xác thực chữ ký cho " + finalDesc + "...");
 
         Task<Boolean> task = new Task<>() {
             @Override
             protected Boolean call() {
-                return model.xacMinhChuKy(dataToVerify, signature, p, alpha, y);
+                return model.xacMinhChuKy(finalData, finalSig, finalP, finalAlpha, finalY);
             }
         };
 
         task.setOnSucceeded(e -> {
             boolean valid = task.getValue();
             setBusy(btnVerify, progressVerify, false);
+
             if (valid) {
                 updateVerifyResultCard("VALID", "✅ Hợp lệ\nChữ ký chính xác và dữ liệu chưa bị sửa đổi.");
-                addLog("XÁC MINH THÀNH CÔNG", "Chữ ký hợp lệ trên " + sourceDescription + ".");
+                addLog("XÁC MINH THÀNH CÔNG", "Chữ ký hợp lệ trên " + finalDesc + ".");
                 return;
             }
 
-            if (currentKeyPair != null && !y.equals(currentKeyPair.getY())) {
+            if (currentKeyPair != null && !finalY.equals(currentKeyPair.getY())) {
                 updateVerifyResultCard("INVALID", "❌ Sai khóa công khai y\nKhóa y không khớp với khóa hệ thống.");
                 addLog("XÁC MINH THẤT BẠI", "Sai khóa công khai y.");
-            } else if (lastSignedData != null && !Arrays.equals(dataToVerify, lastSignedData)) {
-                updateVerifyResultCard("INVALID", "❌ Văn bản bị sửa đổi\nDữ liệu xác minh không khớp dữ liệu gốc lúc ký.");
+            } else if (lastSignedData != null && !Arrays.equals(finalData, lastSignedData)) {
+                updateVerifyResultCard("INVALID", "❌ Dữ liệu bị sửa đổi\nDữ liệu xác minh không khớp dữ liệu gốc lúc ký.");
                 addLog("XÁC MINH THẤT BẠI", "Dữ liệu đã bị sửa đổi.");
-            } else if (lastSignedSignature != null && !sigStr.equals(lastSignedSignature)) {
-                updateVerifyResultCard("INVALID", "❌ Sai chữ ký số\nChữ ký không khớp với chữ ký đã sinh.");
+            } else if (lastSignedSignature != null && !finalSigStr.equals(lastSignedSignature)) {
+                updateVerifyResultCard("INVALID", "❌ Chữ ký đã bị sửa đổi\nChữ ký không khớp với chữ ký đã sinh.");
                 addLog("XÁC MINH THẤT BẠI", "Chữ ký đã bị thay đổi.");
             } else {
                 updateVerifyResultCard("INVALID", "❌ Xác minh không hợp lệ\nChữ ký, dữ liệu hoặc khóa công khai không khớp.");
@@ -682,6 +775,61 @@ public class MainController {
             case "VALID" -> vboxResultCard.getStyleClass().add("result-card-valid");
             case "INVALID", "INVALID_FORMAT" -> vboxResultCard.getStyleClass().add("result-card-invalid");
             default -> vboxResultCard.getStyleClass().add("result-card-default");
+        }
+    }
+
+    private void displayVerificationErrors(List<VerificationError> errors) {
+        if (errors.isEmpty()) return;
+
+        // Xác định status tổng thể
+        String status = "DEFAULT";
+        for (VerificationError err : errors) {
+            if ("INVALID".equals(err.status)) {
+                status = "INVALID";
+                break;
+            }
+        }
+
+        // Thu thập các title, loại trùng (r và s cùng sai → chỉ giữ 1 "❌ Sai chữ ký số")
+        LinkedHashSet<String> titles = new LinkedHashSet<>();
+        for (VerificationError err : errors) {
+            titles.add(err.title);
+        }
+
+        // Kiểm tra có cả "văn bản bị sửa đổi" và "sai chữ ký số" không → gộp thành 1 dòng
+        boolean hasTextModified  = titles.contains("❌ Văn bản bị sửa đổi");
+        boolean hasSigModified   = titles.contains("❌ Sai chữ ký số");
+        if (hasTextModified && hasSigModified) {
+            titles.remove("❌ Văn bản bị sửa đổi");
+            titles.remove("❌ Sai chữ ký số");
+            // Chèn vào đầu danh sách còn lại
+            LinkedHashSet<String> merged = new LinkedHashSet<>();
+            merged.add("❌ Văn bản và chữ ký đã bị sửa đổi");
+            merged.addAll(titles);
+            titles = merged;
+        }
+
+        String message;
+        if (errors.size() == 1) {
+            // ĐỦ ĐÚNG 1 LỖI: hiện cả Title + Detail
+            VerificationError err = errors.get(0);
+            message = err.detail.isEmpty() ? err.title : err.title + "\n" + err.detail;
+        } else {
+            // TỪ 2 LỖI TRỞ LÊN: chỉ lấy các Title, xuống dòng bằng \n
+            message = String.join("\n", titles);
+        }
+
+        updateVerifyResultCard(status, message);
+    }
+    private static class VerificationError {
+        final String title;
+        final String detail;
+        final String status;
+
+        VerificationError(String title, String detail, String status) {
+            this.title = title;
+            this.detail = detail;
+            this.status = status;
         }
     }
 
@@ -776,6 +924,63 @@ public class MainController {
 
             lvLogs.getItems().clear();
             addLog("RESET", "Hệ thống đã được khôi phục về trạng thái mặc định.");
+        }
+    }
+    // ================== CÁC HÀM NẠP/LƯU VĂN BẢN TRỰC TIẾP ==================
+
+    @FXML
+    private void handleLoadSignText() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Chọn tệp văn bản (.txt)");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Tệp văn bản (*.txt)", "*.txt"));
+        File file = chooser.showOpenDialog(taSignInput.getScene().getWindow());
+        if (file != null) {
+            try {
+                String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                taSignInput.setText(content);
+                addLog("NẠP VĂN BẢN", "Đã nạp nội dung để ký từ file: " + file.getName());
+            } catch (Exception e) {
+                showError("Lỗi đọc file", null, "Không thể đọc nội dung file: " + e.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    private void handleSaveSignText() {
+        String text = taSignInput.getText();
+        if (text == null || text.trim().isEmpty()) {
+            showError("Lỗi lưu file", null, "Không có nội dung văn bản để lưu.");
+            return;
+        }
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Lưu tệp văn bản (.txt)");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Tệp văn bản (*.txt)", "*.txt"));
+        File file = chooser.showSaveDialog(taSignInput.getScene().getWindow());
+        if (file != null) {
+            try {
+                Files.write(file.toPath(), text.getBytes(StandardCharsets.UTF_8));
+                addLog("LƯU VĂN BẢN", "Đã lưu nội dung đang gõ ra file: " + file.getName());
+                showInfo("Lưu thành công", null, "Đã lưu văn bản vào tệp: " + file.getName());
+            } catch (Exception e) {
+                showError("Lỗi lưu file", null, "Không thể lưu file: " + e.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    private void handleLoadVerifyText() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Chọn tệp văn bản (.txt)");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Tệp văn bản (*.txt)", "*.txt"));
+        File file = chooser.showOpenDialog(taVerifyInput.getScene().getWindow());
+        if (file != null) {
+            try {
+                String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                taVerifyInput.setText(content);
+                addLog("NẠP VĂN BẢN", "Đã nạp nội dung để kiểm tra từ file: " + file.getName());
+            } catch (Exception e) {
+                showError("Lỗi đọc file", null, "Không thể đọc nội dung file: " + e.getMessage());
+            }
         }
     }
 }

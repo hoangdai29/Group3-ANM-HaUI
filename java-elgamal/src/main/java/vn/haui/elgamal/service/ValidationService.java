@@ -69,6 +69,9 @@ public class ValidationService {
         if (parts.length != 2) {
             throw new IllegalArgumentException("Sai định dạng chữ ký. Định dạng chuẩn phải có dạng: r_base64|s_base64");
         }
+        if (parts[0].trim().length() % 4 != 0 || parts[1].trim().length() % 4 != 0) {
+            throw new IllegalArgumentException("Chữ ký đã bị can thiệp làm mất cấu trúc đệm (Base64 Padding).");
+        }
         try {
             byte[] rBytes = Base64.getDecoder().decode(parts[0].trim());
             byte[] sBytes = Base64.getDecoder().decode(parts[1].trim());
